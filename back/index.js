@@ -60,7 +60,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/doctors/add-new", async (req, res) => {
+  app.post("/dentistry_clinic_admin/doctors/", async (req, res) => {
     try {
       await connect();
       const collection = db.collection("doctors");
@@ -137,7 +137,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/patients/add-new", async (req, res) => {
+  app.post("/dentistry_clinic_admin/patients/", async (req, res) => {
     try {
       await connect();
       const collection = db.collection("patients");
@@ -238,7 +238,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/procedures/add-new", async (req, res) => {
+  app.post("/dentistry_clinic_admin/procedures/", async (req, res) => {
     try {
       await connect();
       const collection = db.collection("procedures");
@@ -317,7 +317,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/appointments/add-new", async (req, res) => {
+  app.post("/dentistry_clinic_admin/appointments/", async (req, res) => {
     try {
       await connect();
       const collection = db.collection("appointments");
@@ -398,7 +398,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/schedules/add-new", async (req, res) => {
+  app.post("/dentistry_clinic_admin/schedules/", async (req, res) => {
     try {
       await connect();
       const collection = db.collection("schedules");
