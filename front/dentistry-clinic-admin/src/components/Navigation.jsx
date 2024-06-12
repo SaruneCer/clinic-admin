@@ -22,7 +22,9 @@ export function Navigation() {
         <ul>
           <li>
             <Link
-              className={activeLink === "/" ? "active-link" : "link"}
+              className={
+                activeLink === "/dentistry-clinic-admin/home" ? "active-link" : "link"
+              }
               to={"/dentistry-clinic-admin/home"}
             >
               Home
@@ -30,7 +32,9 @@ export function Navigation() {
           </li>
           <li>
             <Link
-              className={activeLink === "/" ? "active-link" : "link"}
+              className={
+                activeLink === "/dentistry-clinic-admin/doctors" ? "active-link" : "link"
+              }
               to={"/dentistry-clinic-admin/doctors"}
             >
               Doctors
@@ -38,15 +42,19 @@ export function Navigation() {
           </li>
           <li>
             <Link
-              className={activeLink === "/" ? "active-link" : "link"}
+              className={
+                activeLink === "/dentistry-clinic-admin/patients" ? "active-link" : "link"
+              }
               to={"/dentistry-clinic-admin/patients"}
             >
               Patients
             </Link>
-                  </li>
-                  <li>
+          </li>
+          <li>
             <Link
-              className={activeLink === "/" ? "active-link" : "link"}
+              className={
+                activeLink === "/dentistry-clinic-admin/procedures" ? "active-link" : "link"
+              }
               to={"/dentistry-clinic-admin/procedures"}
             >
               Procedures
