@@ -1,9 +1,10 @@
+import { Button } from './Button'; 
 import { useState } from "react";
+import "../styles/edit-info-modal.css";
 
 export function EditInfoModal({ dataInfo, onSave, onClose }) {
   const [editedInfo, setEditedInfo] = useState(dataInfo);
   const [isEditing, setIsEditing] = useState(false);
-
 
   const handleChange = (e, parentKey = null) => {
     const { name, value } = e.target;
@@ -30,7 +31,7 @@ export function EditInfoModal({ dataInfo, onSave, onClose }) {
   const handleBlur = () => {
     setIsEditing(false);
   };
-    
+
   const handleSave = () => {
     onSave(editedInfo);
     setIsEditing(false);
@@ -39,13 +40,11 @@ export function EditInfoModal({ dataInfo, onSave, onClose }) {
   const renderFormFields = (data, parentKey = null) => {
     return Object.keys(data).map((key) => {
       const value = data[key];
+      if (key === "_id") {
+        return null;
+      }
       if (typeof value === "object" && !Array.isArray(value) && value !== null) {
-        return (
-          <fieldset key={key} className="nested-fieldset">
-            <legend>{key}</legend>
-            {renderFormFields(value, key)}
-          </fieldset>
-        );
+        return renderFormFields(value, key);
       }
       return (
         <div className="edit-form-input" key={key}>
@@ -61,7 +60,7 @@ export function EditInfoModal({ dataInfo, onSave, onClose }) {
           />
         </div>
       );
-    });
+    }).filter(Boolean);
   };
 
   return (
@@ -72,20 +71,8 @@ export function EditInfoModal({ dataInfo, onSave, onClose }) {
         <form className="edit-form">
           {renderFormFields(editedInfo)}
           <div className="modal-buttons">
-            <button
-              type="button"
-              className="button confirm-button"
-              onClick={handleSave}
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              className="button cancel-button"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
+            <Button buttonText="Save" onClick={handleSave} />
+            <Button buttonText="Cancel" onClick={onClose} />
           </div>
         </form>
       </div>
