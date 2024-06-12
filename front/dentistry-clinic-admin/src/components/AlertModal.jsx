@@ -1,6 +1,6 @@
 import { Button } from "../components/Button"; 
 
-export function Modal({ isOpen, message, onClose, buttons }) {
+export function AlertModal({ isOpen, message, onClose, buttons }) {
   return (
     <>
       {isOpen && (
