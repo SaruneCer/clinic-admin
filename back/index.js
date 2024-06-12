@@ -75,22 +75,31 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     }
   });
-  
-  app.post("/dentistry_clinic_admin/doctors/edit-info/:id", async (req, res) => {
+
+
+  app.patch("/dentistry_clinic_admin/doctors/:id", async (req, res) => {
     try {
       await connect();
       const objectId = new ObjectId(req.params.id);
       const collection = db.collection("doctors");
       const editedInfo = req.body;
   
-      const updateFields = {
-        name: editedInfo.name,
-        specialization: editedInfo.specialization,
-        contactInfo: {
-          phone: editedInfo.phone,
-          email: editedInfo.email,
-        },
-      };
+      const updateFields = {};
+      if (editedInfo.name) {
+        updateFields.name = editedInfo.name;
+      }
+      if (editedInfo.specialization) {
+        updateFields.specialization = editedInfo.specialization;
+      }
+      if (editedInfo.contactInfo) {
+        updateFields.contactInfo = {};
+        if (editedInfo.contactInfo.phone) {
+          updateFields.contactInfo.phone = editedInfo.contactInfo.phone;
+        }
+        if (editedInfo.contactInfo.email) {
+          updateFields.contactInfo.email = editedInfo.contactInfo.email;
+        }
+      }
   
       const result = await collection.updateOne({ _id: objectId }, { $set: updateFields });
   
@@ -105,7 +114,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  // patients collection 
+
   
   app.get("/dentistry_clinic_admin/patients", async (req, res) => {
     try {
@@ -137,37 +146,29 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/patients/", async (req, res) => {
-    try {
-      await connect();
-      const collection = db.collection("patients");
-      const newPatient = req.body;
-  
-      // Validation 
-  
-      const result = await collection.insertOne(newPatient);
-      res.json({ message: "Patient added successfully", patientId: result.insertedId });
-    } catch (e) {
-      console.error("Error adding new patient:", e);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-  
-  app.post("/dentistry_clinic_admin/patients/edit-info/:id", async (req, res) => {
+  app.patch("/dentistry_clinic_admin/patients/:id", async (req, res) => {
     try {
       await connect();
       const objectId = new ObjectId(req.params.id);
       const collection = db.collection("patients");
       const editedInfo = req.body;
   
-      const updateFields = {
-        name: editedInfo.name,
-        contactInfo: {
-          phone: editedInfo.phone,
-          email: editedInfo.email,
-          address: editedInfo.address,
-        },
-      };
+      const updateFields = {};
+      if (editedInfo.name) {
+        updateFields.name = editedInfo.name;
+      }
+      if (editedInfo.contactInfo) {
+        updateFields.contactInfo = {};
+        if (editedInfo.contactInfo.phone) {
+          updateFields.contactInfo.phone = editedInfo.contactInfo.phone;
+        }
+        if (editedInfo.contactInfo.email) {
+          updateFields.contactInfo.email = editedInfo.contactInfo.email;
+        }
+        if (editedInfo.contactInfo.address) {
+          updateFields.contactInfo.address = editedInfo.contactInfo.address;
+        }
+      }
   
       const result = await collection.updateOne({ _id: objectId }, { $set: updateFields });
   
@@ -181,6 +182,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     }
   });
+  
   
   app.post("/dentistry_clinic_admin/patients/:id/add-medical-condition", async (req, res) => {
     try {
@@ -254,18 +256,23 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/procedures/edit/:id", async (req, res) => {
+  app.patch("/dentistry_clinic_admin/procedures/:id", async (req, res) => {
     try {
       await connect();
       const objectId = new ObjectId(req.params.id);
       const collection = db.collection("procedures");
       const editedInfo = req.body;
   
-      const updateFields = {
-        name: editedInfo.name,
-        duration: editedInfo.duration,
-        price: editedInfo.price,
-      };
+      const updateFields = {};
+      if (editedInfo.name) {
+        updateFields.name = editedInfo.name;
+      }
+      if (editedInfo.duration) {
+        updateFields.duration = editedInfo.duration;
+      }
+      if (editedInfo.price) {
+        updateFields.price = editedInfo.price;
+      }
   
       const result = await collection.updateOne({ _id: objectId }, { $set: updateFields });
   
@@ -279,6 +286,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     }
   });
+  
   
   // appointments collection 
   
@@ -333,19 +341,26 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/appointments/edit/:id", async (req, res) => {
+  app.patch("/dentistry_clinic_admin/appointments/:id", async (req, res) => {
     try {
       await connect();
       const objectId = new ObjectId(req.params.id);
       const collection = db.collection("appointments");
       const editedInfo = req.body;
   
-      const updateFields = {
-        doctorName: editedInfo.doctorName,
-        patientName: editedInfo.patientName,
-        procedureName: editedInfo.procedureName,
-        comment: editedInfo.comment,
-      };
+      const updateFields = {};
+      if (editedInfo.doctorName) {
+        updateFields.doctorName = editedInfo.doctorName;
+      }
+      if (editedInfo.patientName) {
+        updateFields.patientName = editedInfo.patientName;
+      }
+      if (editedInfo.procedureName) {
+        updateFields.procedureName = editedInfo.procedureName;
+      }
+      if (editedInfo.comment) {
+        updateFields.comment = editedInfo.comment;
+      }
   
       const result = await collection.updateOne({ _id: objectId }, { $set: updateFields });
   
@@ -359,6 +374,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     }
   });
+  
   
   // schedules 
   
@@ -414,19 +430,26 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
     }
   });
   
-  app.post("/dentistry_clinic_admin/schedules/edit/:id", async (req, res) => {
+  app.patch("/dentistry_clinic_admin/schedules/:id", async (req, res) => {
     try {
       await connect();
       const objectId = new ObjectId(req.params.id);
       const collection = db.collection("schedules");
       const editedInfo = req.body;
   
-      const updateFields = {
-        doctorName: editedInfo.doctorName,
-        patientName: editedInfo.patientName,
-        procedureName: editedInfo.procedureName,
-        comment: editedInfo.comment,
-      };
+      const updateFields = {};
+      if (editedInfo.doctorName) {
+        updateFields.doctorName = editedInfo.doctorName;
+      }
+      if (editedInfo.patientName) {
+        updateFields.patientName = editedInfo.patientName;
+      }
+      if (editedInfo.procedureName) {
+        updateFields.procedureName = editedInfo.procedureName;
+      }
+      if (editedInfo.comment) {
+        updateFields.comment = editedInfo.comment;
+      }
   
       const result = await collection.updateOne({ _id: objectId }, { $set: updateFields });
   
@@ -440,6 +463,7 @@ app.get("/dentistry_clinic_admin/doctors", async (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     }
   });
+  
   
 
 app.listen(8080, () => {
