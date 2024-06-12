@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "./Button";
 import { usePostData } from "../customHooks/usePostData";
-import "../styles/add-form-modal.css"
+import "../styles/add-form-modal.css";
 
 export function AddFormModal({ resource, onClose, rerender }) {
   const fieldConfigurations = {
@@ -50,12 +50,49 @@ export function AddFormModal({ resource, onClose, rerender }) {
   };
 
   const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
   const { postData, isLoading } = usePostData(resource);
 
   const fields = fieldConfigurations[resource] || [];
 
+  const validateForm = () => {
+    const newErrors = {};
+  
+    fields.forEach((field) => {
+      if (!formData[field.name]) {
+        newErrors[field.name] = "Please fill in";
+      }
+    });
+  
+    const emailField = fields.find((field) => field.type === "email");
+    if (emailField) {
+      const emailValue = formData[emailField.name];
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailValue)) {
+        newErrors[emailField.name] = "Email invalid";
+      }
+    }
+  
+    const phoneField = fields.find((field) => field.name === "phone");
+    if (phoneField) {
+      const phoneValue = formData[phoneField.name];
+      const phoneRegex = /^\+\d{1,3}\d{6,14}$/;
+      if (!phoneRegex.test(phoneValue)) {
+        newErrors[phoneField.name] = "Number invalid";
+      }
+    }
+  
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; 
+  };
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     const adjustedFormData = { ...formData };
 
@@ -90,6 +127,9 @@ export function AddFormModal({ resource, onClose, rerender }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
   return (
@@ -100,14 +140,18 @@ export function AddFormModal({ resource, onClose, rerender }) {
         </span>
         <form>
           {fields.map((field) => (
-            <input
-              key={field.name}
-              type={field.type}
-              name={field.name}
-              placeholder={field.placeholder}
-              value={formData[field.name] || ""}
-              onChange={handleChange}
-            />
+            <div className="input-wrapper" key={field.name}>
+              <input
+                type={field.type}
+                name={field.name}
+                placeholder={field.placeholder}
+                value={formData[field.name] || ""}
+                onChange={handleChange}
+              />
+              {errors[field.name] && (
+                <p className="error-message">{errors[field.name]}</p>
+              )}
+            </div>
           ))}
           <Button
             buttonText="Add"
