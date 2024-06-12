@@ -12,7 +12,8 @@ export function AddFormModal({ resource, onClose, rerender }) {
       { name: "email", type: "email", placeholder: "Email address" },
     ],
     patients: [
-      { name: "name", type: "text", placeholder: "Name Lastname" },
+      { name: "name", type: "text", placeholder: "Name" },
+      { name: "lastname", type: "text", placeholder: "Lastname" },
       { name: "dob", type: "date", placeholder: "Date of birth" },
       { name: "phone", type: "text", placeholder: "Phone number" },
       { name: "email", type: "email", placeholder: "Email address" },
@@ -57,13 +58,13 @@ export function AddFormModal({ resource, onClose, rerender }) {
 
   const validateForm = () => {
     const newErrors = {};
-  
+
     fields.forEach((field) => {
       if (!formData[field.name]) {
         newErrors[field.name] = "Please fill in";
       }
     });
-  
+
     const emailField = fields.find((field) => field.type === "email");
     if (emailField) {
       const emailValue = formData[emailField.name];
@@ -72,7 +73,7 @@ export function AddFormModal({ resource, onClose, rerender }) {
         newErrors[emailField.name] = "Email invalid";
       }
     }
-  
+
     const phoneField = fields.find((field) => field.name === "phone");
     if (phoneField) {
       const phoneValue = formData[phoneField.name];
@@ -81,11 +82,10 @@ export function AddFormModal({ resource, onClose, rerender }) {
         newErrors[phoneField.name] = "Number invalid";
       }
     }
-  
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; 
+    return Object.keys(newErrors).length === 0;
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
