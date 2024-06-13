@@ -8,24 +8,26 @@ import { SearchInput } from "../components/SearchInput";
 import "../styles/patients.css";
 
 export function Patients() {
-  const { data: patients, loading, rerender } = useGetData("patients");
+  const { data: patients = [], loading, rerender } = useGetData("patients"); 
   const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
-  const [searchValue, setSearchValue, filteredPatients] = useSearch(patients);
+  const [searchValue, setSearchValue, filteredPatients = []] = useSearch(patients); 
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  patients.sort((a, b) => a.lastname.localeCompare(b.lastname));
+  if (Array.isArray(patients)) {
+    patients.sort((a, b) => a.lastname.localeCompare(b.lastname));
+  }
 
-  const groupedPatients = filteredPatients.reduce((acc, patient) => {
+  const groupedPatients = Array.isArray(filteredPatients) ? filteredPatients.reduce((acc, patient) => {
     const firstLetter = patient.lastname[0].toUpperCase();
     if (!acc[firstLetter]) {
       acc[firstLetter] = [];
     }
     acc[firstLetter].push(patient);
     return acc;
-  }, {});
+  }, {}) : {};
 
   const letters = Object.keys(groupedPatients);
 
@@ -45,7 +47,7 @@ export function Patients() {
               <Link
                 className="patient-name-link"
                 to={`/dentistry-clinic-admin/patient-records/${patient._id}`}
-                  >
+              >
                 {patient.name} {patient.lastname}
               </Link>
             </div>
