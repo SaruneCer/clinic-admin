@@ -45,7 +45,7 @@ export function Patients() {
               <Link
                 className="patient-name-link"
                 to={`/dentistry-clinic-admin/patient-records/${patient._id}`}
-              >
+                  >
                 {patient.name} {patient.lastname}
               </Link>
             </div>
