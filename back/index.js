@@ -133,6 +133,31 @@ app.get("/dentistry_clinic_admin/patients", async (req, res) => {
   }
 });
 
+app.get("/dentistry_clinic_admin/patients/:patientID", async (req, res) => {
+  try {
+    await connect();
+
+    const patientID = req.params.patientID;
+
+    if (!ObjectId.isValid(patientID)) {
+      return res.status(400).json({ error: "Invalid patient ID format" });
+    }
+
+    const objectId = new ObjectId(patientID);
+    const collection = db.collection("patients");
+
+    const patient = await collection.findOne({ _id: objectId });
+    if (!patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+
+    res.json(patient);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 app.post("/dentistry_clinic_admin/patients/", async (req, res) => {
   try {
     await connect();
