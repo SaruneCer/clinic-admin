@@ -3,10 +3,11 @@ import { useGetData } from "../customHooks/useGetData";
 import { Button } from "../components/Button";
 import { AddFormModal } from "../components/AddFormModal";
 import { useState } from "react";
+import "../styles/patients.css";
 
 export function Patients() {
-    const { data: patients, loading, rerender } = useGetData("patients");
-    const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
+  const { data: patients, loading, rerender } = useGetData("patients");
+  const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -14,52 +15,76 @@ export function Patients() {
 
   patients.sort((a, b) => a.lastname.localeCompare(b.lastname));
 
-  let currentLetter = null;
-  const patientElements = [];
-
-  patients.forEach((patient, index) => {
-    const lastName = patient.lastname;
-    const firstLetter = lastName[0].toUpperCase();
-    let header = null;
-
-    if (firstLetter !== currentLetter) {
-      header = <h2 key={`header-${firstLetter}`}>{firstLetter}</h2>;
-      currentLetter = firstLetter;
-      patientElements.push(header);
+  const groupedPatients = patients.reduce((acc, patient) => {
+    const firstLetter = patient.lastname[0].toUpperCase();
+    if (!acc[firstLetter]) {
+      acc[firstLetter] = [];
     }
+    acc[firstLetter].push(patient);
+    return acc;
+  }, {});
 
-    patientElements.push(
-      <Link
-        key={`link-${index}`}
-        to={`/dentistry-clinic-admin/patient-records/${patient._id.$oid}`}
-      >
-        {patient.name} {patient.lastname}
-      </Link>,
-      <br key={`br-${index}`} />
-    );
-  });
-    
+
+  const letters = Object.keys(groupedPatients);
+
+
+  const patientElements = Object.entries(groupedPatients).map(([letter, patients]) => (
+    <div key={`group-${letter}`} id={`section-${letter}`} className="patient-group">
+      <div className="letter-header">
+        <h2>{letter}</h2>
+      </div>
+      <div className="patient-names">
+        {patients.map((patient) => (
+          <div key={`patient-${patient._id.$oid}`} className="patient-item">
+            <Link
+              className="patient-name-link"
+              to={`/dentistry-clinic-admin/patient-records/${patient._id.$oid}`}
+            >
+              {patient.name} {patient.lastname}
+            </Link>
+          </div>
+        ))}
+      </div>
+    </div>
+  ));
+
+  const handleLetterClick = (letter) => {
+    const targetSection = document.getElementById(`section-${letter}`);
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const handleAddClick = () => {
     setIsAddFormModalOpen(true);
   };
-    
+
   const handleAddFormCloseModal = () => {
     setIsAddFormModalOpen(false);
   };
 
   return (
     <main>
-        <header>
+      <header>
         <Button buttonText={"+ ADD PATIENT"} onClick={handleAddClick} />
       </header>
-          <div>{patientElements}</div>
-          {isAddFormModalOpen && (
-        <AddFormModal
-          resource="patients"
-          onClose={handleAddFormCloseModal}
-          rerender={rerender}
-        />
-      )}
+      <div className="alphabet-nav">
+        {letters.map((letter) => (
+          <button key={`nav-${letter}`} onClick={() => handleLetterClick(letter)} className="nav-button">
+            {letter}
+          </button>
+        ))}
+      </div>
+      <div id="patient-list-container">
+        <div className="alphabetical-section">{patientElements}</div>
+        {isAddFormModalOpen && (
+          <AddFormModal
+            resource="patients"
+            onClose={handleAddFormCloseModal}
+            rerender={rerender}
+          />
+        )}
+      </div>
     </main>
   );
 }
