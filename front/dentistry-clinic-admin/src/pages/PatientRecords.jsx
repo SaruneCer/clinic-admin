@@ -1,14 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetData } from "../customHooks/useGetData";
+import { Button } from "../components/Button";
+import { ItemBox } from "../components/ItemBox";
 
 export function PatientRecords() {
   const { patientID } = useParams();
-  console.log(patientID);
   const [loading, setLoading] = useState(true);
   const { data: patient, loading: patientLoading } = useGetData(
     `patients/${patientID}`
   );
+
+  const handleEditPersonalInfoClick = () => {};
+
+  const handleEditConditionClick = () => {};
+
+  const handleDeleteConditionClick = () => {};
+
+  const handleAddContinionClick = () => {};
 
   useEffect(() => {
     setLoading(patientLoading);
@@ -20,32 +29,60 @@ export function PatientRecords() {
     return <p>Error: Patient data is missing or incomplete.</p>;
   }
 
+  const isMedicalHistoryEmpty =
+    !patient.medicalHistory.length ||
+    patient.medicalHistory.every(
+      (history) => !history.condition && !history.notes
+    );
+
   return (
     <main>
-      <h1>Patient Records</h1>
+      <header>
+        <h1>
+          {patient.name} {patient.lastname}
+        </h1>
+      </header>
+
       <div>
-        <h2>
-          Name: {patient.name} {patient.lastname}
-        </h2>
-        <p>Date of Birth: {patient.dob}</p>
-        <p>Phone: {patient.contactInfo.phone}</p>
-        <p>Email: {patient.contactInfo.email}</p>
-        <p>Address: {patient.contactInfo.address}</p>
-        <h3>Medical History:</h3>
-        <ul>
-          {patient.medicalHistory?.length ? (
-            patient.medicalHistory.map((history, index) => (
-              <li key={index}>
-                <strong>Condition:</strong>{" "}
-                {history.conditions ? history.conditions : "none"}
-                <br />
-                <strong>Notes:</strong> {history.notes ? history.notes : "none"}
-              </li>
-            ))
+        <div className="personal-info-container">
+          <div className="header-wrapper">
+            {" "}
+            <h3>Personal Information</h3>
+            <Button
+              buttonText={"EDIT INFO"}
+              onClick={handleEditPersonalInfoClick}
+            />{" "}
+          </div>
+
+          <p>Date of Birth: {patient.dob}</p>
+          <p>Phone: {patient.contactInfo.phone}</p>
+          <p>Email: {patient.contactInfo.email}</p>
+          <p>Address: {patient.contactInfo.address}</p>
+        </div>
+        <div className="medical-history-container">
+          <div className="header-wrapper">
+            {" "}
+            <h3>Medical History</h3>
+            <Button
+              buttonText={"ADD CONDITION"}
+              onClick={handleAddContinionClick}
+            />
+          </div>
+
+          {isMedicalHistoryEmpty ? (
+            <p>No medical conditions known.</p>
           ) : (
-            <li>No medical history available.</li>
+            patient.medicalHistory.map((history, index) => (
+              <ItemBox
+                key={index}
+                item={history}
+                itemType="medical-condition"
+                handleDeleteClick={handleDeleteConditionClick}
+                handleEditClick={handleEditConditionClick}
+              />
+            ))
           )}
-        </ul>
+        </div>
       </div>
     </main>
   );
