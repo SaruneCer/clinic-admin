@@ -3,15 +3,36 @@ import { useParams } from "react-router-dom";
 import { useGetData } from "../customHooks/useGetData";
 import { Button } from "../components/Button";
 import { ItemBox } from "../components/ItemBox";
+import { useEditData } from "../customHooks/useEditData";
+import { EditInfoModal } from "../components/EditInfoModal";
 
 export function PatientRecords() {
   const { patientID } = useParams();
   const [loading, setLoading] = useState(true);
-  const { data: patient, loading: patientLoading } = useGetData(
-    `patients/${patientID}`
-  );
+  const {
+    data: patient,
+    loading: patientLoading,
+    rerender,
+  } = useGetData(`patients/${patientID}`);
+  const [patientToEdit, setPatientToEdit] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { editData } = useEditData("patients");
 
-  const handleEditPersonalInfoClick = () => {};
+  const handleEditPersonalInfoClick = () => {
+    setIsEditModalOpen(true);
+    setPatientToEdit(patient);
+  };
+
+  const handleSave = async (editedInfo) => {
+    try {
+      await editData(patientToEdit._id, editedInfo);
+      setPatientToEdit(editedInfo);
+      setIsEditModalOpen(false);
+      rerender();
+    } catch (error) {
+      console.error("Error updating patient information:", error);
+    }
+  };
 
   const handleEditConditionClick = () => {};
 
@@ -84,6 +105,13 @@ export function PatientRecords() {
           )}
         </div>
       </div>
+      {isEditModalOpen && (
+        <EditInfoModal
+          dataInfo={patient}
+          onSave={handleSave}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
     </main>
   );
 }
