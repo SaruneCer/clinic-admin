@@ -17,20 +17,31 @@ export function PatientRecords() {
   const [patientToEdit, setPatientToEdit] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { editData } = useEditData("patients");
+  const [isAddingCondition, setIsAddingCondition] = useState(false);
 
   const handleEditPersonalInfoClick = () => {
     setIsEditModalOpen(true);
     setPatientToEdit(patient);
   };
 
-  const handleSave = async (editedInfo) => {
+  const handleSave = async (data) => {
     try {
-      await editData(patientToEdit._id, editedInfo);
-      setPatientToEdit(editedInfo);
+      if (isAddingCondition) {
+        const newCondition = {
+          conditions: data.conditions,
+          notes: data.notes,
+        };
+        await editData(patientToEdit._id, newCondition, "add-new-condition");
+
+        setIsAddingCondition(false);
+      } else {
+        await editData(patientToEdit._id, data, "info");
+      }
+
       setIsEditModalOpen(false);
       rerender();
     } catch (error) {
-      console.error("Error updating patient information:", error);
+      console.error("Error saving data:", error);
     }
   };
 
@@ -38,7 +49,11 @@ export function PatientRecords() {
 
   const handleDeleteConditionClick = () => {};
 
-  const handleAddContinionClick = () => {};
+  const handleAddContinionClick = () => {
+    setPatientToEdit(patient);
+    setIsAddingCondition(true);
+    setIsEditModalOpen(true);
+  };
 
   useEffect(() => {
     setLoading(patientLoading);
@@ -53,7 +68,7 @@ export function PatientRecords() {
   const isMedicalHistoryEmpty =
     !patient.medicalHistory.length ||
     patient.medicalHistory.every(
-      (history) => !history.condition && !history.notes
+      (history) => !history.conditions && !history.notes
     );
 
   return (
@@ -107,9 +122,10 @@ export function PatientRecords() {
       </div>
       {isEditModalOpen && (
         <EditInfoModal
-          dataInfo={patient}
+          dataInfo={isAddingCondition ? {} : patient}
           onSave={handleSave}
           onClose={() => setIsEditModalOpen(false)}
+          isAddingCondition={isAddingCondition}
         />
       )}
     </main>
