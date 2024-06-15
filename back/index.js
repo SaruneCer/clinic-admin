@@ -195,7 +195,7 @@ app.delete("/dentistry_clinic_admin/patients/:id", async (req, res) => {
   }
 });
 
-app.patch("/dentistry_clinic_admin/patients/:id", async (req, res) => {
+app.patch("/dentistry_clinic_admin/patients/:id/info", async (req, res) => {
   try {
     await connect();
     const objectId = new ObjectId(req.params.id);
@@ -238,13 +238,14 @@ app.patch("/dentistry_clinic_admin/patients/:id", async (req, res) => {
   }
 });
 
-app.post(
-  "/dentistry_clinic_admin/patients/:id/add-medical-condition",
+//adding new medical condition
+app.patch(
+  "/dentistry_clinic_admin/patients/:id/add-new-condition",
   async (req, res) => {
     try {
       await connect();
       const patientId = req.params.id;
-      const newMedicalCondition = req.body;
+      const { conditions, notes } = req.body;
       const collection = db.collection("patients");
 
       const patient = await collection.findOne({
@@ -256,7 +257,7 @@ app.post(
 
       await collection.updateOne(
         { _id: new ObjectId(patientId) },
-        { $push: { medicalHistory: newMedicalCondition } }
+        { $push: { medicalHistory: { conditions, notes } } }
       );
 
       res.status(200).json({ message: "Medical condition added successfully" });
