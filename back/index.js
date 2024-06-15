@@ -90,6 +90,9 @@ app.patch("/dentistry_clinic_admin/doctors/:id", async (req, res) => {
     if (editedInfo.name) {
       updateFields.name = editedInfo.name;
     }
+    if (editedInfo.lastname) {
+      updateFields.lastname = editedInfo.lastname;
+    }
     if (editedInfo.specialization) {
       updateFields.specialization = editedInfo.specialization;
     }
@@ -204,7 +207,7 @@ app.patch("/dentistry_clinic_admin/patients/:id", async (req, res) => {
       updateFields.name = editedInfo.name;
     }
     if (editedInfo.lastname) {
-      updateFields.name = editedInfo.lastname;
+      updateFields.lastname = editedInfo.lastname;
     }
     if (editedInfo.contactInfo) {
       updateFields.contactInfo = {};
