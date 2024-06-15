@@ -9,7 +9,8 @@ export function ItemBox({
 }) {
   return (
     <div className="item-box">
-      <h2>{item.name}</h2>
+      {item.name && <h2>{item.name}</h2>}
+      
       {itemType === "doctor" && (
         <>
           <p className="specialization">{item.specialization}</p>
@@ -29,15 +30,24 @@ export function ItemBox({
           </div>
         </>
       )}
+      
       {itemType === "procedure" && (
         <>
           <p>Duration: {item.duration} minutes</p>
           <p>Price: ${item.price}</p>
         </>
       )}
+      
+      {itemType === "medical-condition" && (
+        <>
+          <p><strong>Condition:</strong> {item.conditions}</p>
+          <p><strong>Notes:</strong> {item.notes}</p>
+        </>
+      )}
+      
       <div className="button-container">
         <Button
-          buttonText={"EDIT INFO"}
+          buttonText={"EDIT"}
           onClick={() => handleEditClick(item._id)}
         />
         <Button buttonText={"DELETE"} onClick={() => handleDeleteClick(item)} />
