@@ -60,6 +60,9 @@ export function AddFormModal({ resource, onClose, rerender }) {
     const newErrors = {};
 
     fields.forEach((field) => {
+      if (resource === "patients" && (field.name === "conditions" || field.name === "notes")) {
+        return;
+      }
       if (!formData[field.name]) {
         newErrors[field.name] = "Please fill in";
       }
