@@ -7,6 +7,7 @@ const connectionString =
   "mongodb+srv://admin:dataCluster1@cluster0.qrlrgxr.mongodb.net/";
 
 const client = new MongoClient(connectionString);
+const generateObjectId = () => new ObjectId();
 
 let conn;
 let db;
@@ -167,9 +168,16 @@ app.post("/dentistry_clinic_admin/patients/", async (req, res) => {
     const collection = db.collection("patients");
     const newPatient = req.body;
 
-    // validation
+    if (newPatient.medicalHistory.length > 0) {
+      newPatient.medicalHistory.forEach((condition) => {
+        if (!condition._id) {
+          condition._id = new ObjectId();
+        }
+      });
+    }
 
     const result = await collection.insertOne(newPatient);
+
     res.json({ message: "Patient added successfully" });
   } catch (e) {
     console.error("Error adding new patient:", e);
@@ -243,9 +251,9 @@ app.patch(
   "/dentistry_clinic_admin/patients/:id/add-new-condition",
   async (req, res) => {
     try {
-      await connect();
       const patientId = req.params.id;
       const { conditions, notes } = req.body;
+
       const collection = db.collection("patients");
 
       const patient = await collection.findOne({
@@ -255,12 +263,22 @@ app.patch(
         return res.status(404).json({ error: "Patient not found" });
       }
 
+      const conditionId = generateObjectId();
+
+      const newCondition = {
+        _id: conditionId,
+        conditions,
+        notes,
+      };
+
       await collection.updateOne(
         { _id: new ObjectId(patientId) },
-        { $push: { medicalHistory: { conditions, notes } } }
+        { $push: { medicalHistory: newCondition } }
       );
 
-      res.status(200).json({ message: "Medical condition added successfully" });
+      res
+        .status(200)
+        .json({ message: "Medical condition added successfully", conditionId });
     } catch (e) {
       console.error("Error adding medical condition:", e);
       res.status(500).json({ error: "Internal server error" });
