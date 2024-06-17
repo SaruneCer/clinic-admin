@@ -11,7 +11,6 @@ export function ItemBox({
     <div className="item-box">
       {itemType === "doctor" && (
         <>
-          {" "}
           {item.name && (
             <h2>
               {item.name} {item.lastname}
@@ -55,8 +54,8 @@ export function ItemBox({
       )}
 
       <div className="button-container">
-        <Button buttonText={"EDIT"} onClick={() => handleEditClick(item._id)} />
-        <Button buttonText={"DELETE"} onClick={() => handleDeleteClick(item)} />
+        <Button buttonText={"EDIT"} onClick={() => handleEditClick(item)} />
+        <Button buttonText={"DELETE"} onClick={() => handleDeleteClick(item._id)} />
       </div>
     </div>
   );
