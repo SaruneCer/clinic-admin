@@ -18,24 +18,33 @@ export function PatientRecords() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { editData } = useEditData("patients");
   const [isAddingCondition, setIsAddingCondition] = useState(false);
+  const [conditionToEdit, setConditionToEdit] = useState(null);
 
   const handleEditPersonalInfoClick = () => {
     setIsEditModalOpen(true);
     setPatientToEdit(patient);
+    setIsAddingCondition(false); 
+    setConditionToEdit(null); 
   };
 
-  const handleSave = async (data) => {
+    const handleSave = async (data) => {
     try {
       if (isAddingCondition) {
         const newCondition = {
           conditions: data.conditions,
           notes: data.notes,
         };
-        await editData(patientToEdit._id, newCondition, "add-new-condition");
-
+        await editData("patients",patientToEdit._id, newCondition, "add-new-condition");
         setIsAddingCondition(false);
+      } else if (conditionToEdit) {
+        await editData("patients",patientToEdit._id, {
+          ...data,
+          conditions: data.conditions,
+          notes: data.notes
+        }, `conditions/${data._id}`);
+        setConditionToEdit(null);
       } else {
-        await editData(patientToEdit._id, data, "info");
+        await editData("patients",patientToEdit._id, data, "info");
       }
 
       setIsEditModalOpen(false);
@@ -45,14 +54,20 @@ export function PatientRecords() {
     }
   };
 
-  const handleEditConditionClick = () => {};
+    const handleEditConditionClick = (condition) => {
+        setConditionToEdit(condition);
+        setPatientToEdit(patient)
+    setIsEditModalOpen(true);
+    setIsAddingCondition(false); 
+  };
 
   const handleDeleteConditionClick = () => {};
 
-  const handleAddContinionClick = () => {
+  const handleAddConditionClick = () => {
     setPatientToEdit(patient);
     setIsAddingCondition(true);
     setIsEditModalOpen(true);
+    setConditionToEdit(null); 
   };
 
   useEffect(() => {
@@ -101,7 +116,7 @@ export function PatientRecords() {
             <h3>Medical History</h3>
             <Button
               buttonText={"ADD CONDITION"}
-              onClick={handleAddContinionClick}
+              onClick={handleAddConditionClick}
             />
           </div>
 
@@ -122,10 +137,11 @@ export function PatientRecords() {
       </div>
       {isEditModalOpen && (
         <EditInfoModal
-          dataInfo={isAddingCondition ? {} : patient}
+          dataInfo={isAddingCondition || conditionToEdit ? {} : patient}
           onSave={handleSave}
           onClose={() => setIsEditModalOpen(false)}
           isAddingCondition={isAddingCondition}
+          conditionToEdit={conditionToEdit}
         />
       )}
     </main>
