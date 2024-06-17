@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useGetData } from "../customHooks/useGetData";
 import { Button } from "../components/Button";
+import { AddFormModal } from "../components/AddFormModal";
 import "../styles/procedures.css";
 
 export function Procedures() {
-  const { data: procedures, loading } = useGetData("procedures");
+  const { data: procedures, loading, rerender } = useGetData("procedures");
   const [groupedProcedures, setGroupedProcedures] = useState({});
-  const [expandedCategory, setExpandedCategory] = useState(null);
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
 
   useEffect(() => {
     if (procedures) {
@@ -24,7 +26,12 @@ export function Procedures() {
     
     const handleEditClick = () => {}
     const handleDeleteClick = () => { }
-    const handleAddClick = () => {}
+    const handleAddClick = () => {
+        setIsAddFormModalOpen(true);
+    }
+    const handleAddFormCloseModal = () => {
+        setIsAddFormModalOpen(false);
+      };
 
   const toggleCategory = (category) => {
     if (expandedCategory === category) {
@@ -91,6 +98,13 @@ export function Procedures() {
           )}
         </div>
       ))}
+                   {isAddFormModalOpen && (
+          <AddFormModal
+            resource="procedures"
+            onClose={handleAddFormCloseModal}
+            rerender={rerender}
+          />
+        )}
     </div></main>
   
   );
