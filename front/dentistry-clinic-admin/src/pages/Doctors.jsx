@@ -46,15 +46,16 @@ export function Doctors() {
     setIsAddFormModalOpen(false);
   };
 
-  const handleEditClick = (doctor) => {
+    const handleEditClick = (doctor) => {
+      console.log(doctor)
     setSelectedDoctor(doctor);
     setIsModalOpen(true);
   };
     
     
-  const handleSave = async (editedInfo) => {
+  const handleSave = async (data) => {
     try {
-      await editData(selectedDoctor._id, editedInfo);
+        await editData("doctors",selectedDoctor._id, data, "info");
       setIsModalOpen(false);
       setSelectedDoctor(null);
       rerender(); 
