@@ -4,6 +4,8 @@ import { Button } from "../components/Button";
 import { AddFormModal } from "../components/AddFormModal";
 import { useEditData } from "../customHooks/useEditData";
 import { EditInfoModal } from "../components/EditInfoModal";
+import { useDeleteData } from "../customHooks/useDeleteData";
+import { AlertModal } from "../components/AlertModal";
 import "../styles/procedures.css";
 
 export function Procedures() {
@@ -11,9 +13,12 @@ export function Procedures() {
   const [groupedProcedures, setGroupedProcedures] = useState({});
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
-  const [procedureToEdit, setProcedureToEdit] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { editData } = useEditData();
+    const [procedureToEdit, setProcedureToEdit] = useState(null);
+    const [procedureToDelete, setProcedureToDelete] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { editData } = useEditData();
+    const { deleteData } = useDeleteData();
 
   useEffect(() => {
     if (procedures) {
@@ -34,8 +39,22 @@ export function Procedures() {
     setProcedureToEdit(procedure);
   };
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (procedure) => {
+    setProcedureToDelete(procedure);
+    setIsModalOpen(true);
+  };
+    
+  const handleDelete = async () => {
+    if (procedureToDelete) {
+      await deleteData("procedures", procedureToDelete, () => rerender());
+      setIsModalOpen(false);
+      setProcedureToDelete(null);
+    }
+  };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setProcedureToDelete(null);
   };
 
   const handleAddClick = () => {
@@ -128,7 +147,26 @@ export function Procedures() {
             onClose={handleAddFormCloseModal}
             rerender={rerender}
           />
-        )}
+              )}
+                {isModalOpen && procedureToDelete && (
+        <AlertModal
+          isOpen={isModalOpen}
+          message={`Do you want to delete ${procedureToDelete.name} procedure?`}
+          onClose={handleCloseModal}
+          buttons={[
+            {
+              label: "Yes",
+              className: "confirm-button",
+              onClick: handleDelete,
+            },
+            {
+              label: "Cancel",
+              className: "cancel-button",
+              onClick: handleCloseModal,
+            },
+          ]}
+        />
+      )}
       </div>
     </main>
   );
