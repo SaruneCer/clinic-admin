@@ -80,7 +80,7 @@ app.post("/dentistry_clinic_admin/doctors/", async (req, res) => {
   }
 });
 
-app.patch("/dentistry_clinic_admin/doctors/:id", async (req, res) => {
+app.patch("/dentistry_clinic_admin/doctors/:id/info", async (req, res) => {
   try {
     await connect();
     const objectId = new ObjectId(req.params.id);
@@ -285,6 +285,38 @@ app.patch(
     }
   }
 );
+
+//edit condition
+
+app.patch("/dentistry_clinic_admin/patients/:patientId/conditions/:conditionId", async (req, res) => {
+  try {
+    const { patientId, conditionId } = req.params;
+    const { conditions, notes } = req.body;
+
+    const collection = db.collection("patients");
+
+    const updatedCondition = {
+      conditions,
+      notes,
+    };
+
+    await collection.updateOne(
+      { 
+        _id: new ObjectId(patientId), 
+        "medicalHistory._id": new ObjectId(conditionId) 
+      },
+      { 
+        $set: { "medicalHistory.$.conditions": conditions, "medicalHistory.$.notes": notes } 
+      }
+    );
+
+    res.status(200).json({ message: "Medical condition updated successfully", conditionId });
+  } catch (e) {
+    console.error("Error updating medical condition:", e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 // procedures
 
