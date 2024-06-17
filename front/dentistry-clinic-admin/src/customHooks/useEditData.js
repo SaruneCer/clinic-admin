@@ -9,22 +9,34 @@ export function useEditData() {
     setIsLoading(true);
     try {
       let url;
+      let response;
 
       if (actionType === "add-new-condition") {
         url = `${BASE_URL}/${resource}/${item}/${actionType}`;
       } else if (actionType === "info") {
         url = `${BASE_URL}/${resource}/${item}/${actionType}`;
+      } else if (actionType === "delete") {
+        url = `${BASE_URL}/${resource}/${item}/conditions/${formData}/delete`;
       } else {
-        url = `${BASE_URL}/${resource}/${item}/conditions/${formData._id}`;
+        url = `${BASE_URL}/${resource}/${item}/conditions/${formData._id}/edit`;
       }
 
-      const response = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      if (actionType === "delete") {
+        response = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      } else {
+        response = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+      }
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
