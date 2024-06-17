@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 const BASE_URL = "http://localhost:8080/dentistry_clinic_admin/";
 
 export function useGetData(resource) {
-  console.log("Use get data:", resource)
   const [data, setData] = useState(null); 
   const [loading, setLoading] = useState(true);
 

@@ -407,7 +407,7 @@ app.post("/dentistry_clinic_admin/procedures/", async (req, res) => {
   }
 });
 
-app.patch("/dentistry_clinic_admin/procedures/:id", async (req, res) => {
+app.patch("/dentistry_clinic_admin/procedures/:id/info", async (req, res) => {
   try {
     await connect();
     const objectId = new ObjectId(req.params.id);
