@@ -251,6 +251,7 @@ app.patch(
   "/dentistry_clinic_admin/patients/:id/add-new-condition",
   async (req, res) => {
     try {
+      await connect();
       const patientId = req.params.id;
       const { conditions, notes } = req.body;
 
@@ -288,35 +289,72 @@ app.patch(
 
 //edit condition
 
-app.patch("/dentistry_clinic_admin/patients/:patientId/conditions/:conditionId", async (req, res) => {
-  try {
-    const { patientId, conditionId } = req.params;
-    const { conditions, notes } = req.body;
+app.patch(
+  "/dentistry_clinic_admin/patients/:patientId/conditions/:conditionId/edit",
+  async (req, res) => {
+    try {
+      await connect();
+      const { patientId, conditionId } = req.params;
+      const { conditions, notes } = req.body;
 
-    const collection = db.collection("patients");
+      const collection = db.collection("patients");
 
-    const updatedCondition = {
-      conditions,
-      notes,
-    };
 
-    await collection.updateOne(
-      { 
-        _id: new ObjectId(patientId), 
-        "medicalHistory._id": new ObjectId(conditionId) 
-      },
-      { 
-        $set: { "medicalHistory.$.conditions": conditions, "medicalHistory.$.notes": notes } 
-      }
-    );
+      await collection.updateOne(
+        {
+          _id: new ObjectId(patientId),
+          "medicalHistory._id": new ObjectId(conditionId),
+        },
+        {
+          $set: {
+            "medicalHistory.$.conditions": conditions,
+            "medicalHistory.$.notes": notes,
+          },
+        }
+      );
 
-    res.status(200).json({ message: "Medical condition updated successfully", conditionId });
-  } catch (e) {
-    console.error("Error updating medical condition:", e);
-    res.status(500).json({ error: "Internal server error" });
+      res
+        .status(200)
+        .json({
+          message: "Medical condition updated successfully",
+          conditionId,
+        });
+    } catch (e) {
+      console.error("Error updating medical condition:", e);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
-});
+);
 
+//delete condition
+
+app.patch(
+  "/dentistry_clinic_admin/patients/:patientId/conditions/:conditionId/delete",
+  async (req, res) => {
+    try {
+      await connect();
+      const { patientId, conditionId } = req.params;
+      const patientObjectId = new ObjectId(patientId);
+      const conditionObjectId = new ObjectId(conditionId);
+
+      const collection = db.collection("patients");
+      const result = await collection.updateOne(
+        { _id: patientObjectId },
+        { $pull: { medicalHistory: { _id: conditionObjectId } } }
+      );
+
+      res
+        .status(200)
+        .json({
+          message: "Medical condition deleted successfully",
+          conditionId,
+        });
+    } catch (e) {
+      console.error("Error deleting medical condition:", e);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
 
 // procedures
 
