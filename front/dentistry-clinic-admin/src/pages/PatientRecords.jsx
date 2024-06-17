@@ -26,6 +26,7 @@ export function PatientRecords() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { deleteData } = useDeleteData();
   const navigate = useNavigate();
+  const [conditionToDelete, setConditionToDelete] = useState(null);
 
   const handleEditPersonalInfoClick = () => {
     setIsEditModalOpen(true);
@@ -83,15 +84,29 @@ export function PatientRecords() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteConditionClick = () => {};
+    const handleDeleteConditionClick = (condition) => {
+    setConditionToDelete(condition);
+    setPatientToEdit(patient);
+    setIsModalOpen(true);
+  };
 
-  const handleDelete = async () => {
+    const handleDelete = async () => {
     if (patientToDelete) {
       await deleteData("patients", patientToDelete._id, () => {
         setIsModalOpen(false);
         setPatientToDelete(null);
         navigate("/dentistry-clinic-admin/patients");
       });
+    } else if (conditionToDelete) {
+      await editData(
+        "patients",
+        patientToEdit._id,
+        conditionToDelete,
+        "delete"
+      );
+      setIsModalOpen(false);
+      setConditionToDelete(null);
+      rerender();
     }
   };
 
@@ -185,10 +200,14 @@ export function PatientRecords() {
           conditionToEdit={conditionToEdit}
         />
       )}
-      {isModalOpen && patientToDelete && (
+      {isModalOpen && (patientToDelete || conditionToDelete) && (
         <AlertModal
           isOpen={isModalOpen}
-          message={`Do you want to delete ${patientToDelete.name}?`}
+          message={
+            patientToDelete
+              ? `Do you want to delete ${patientToDelete.name}?`
+              : `Do you want to delete this condition?`
+          }
           onClose={handleCloseModal}
           buttons={[
             {
