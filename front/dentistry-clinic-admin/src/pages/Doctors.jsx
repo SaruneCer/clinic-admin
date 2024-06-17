@@ -13,8 +13,8 @@ export function Doctors() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
-    const [selectedDoctor, setSelectedDoctor] = useState(null);
-    const { editData} = useEditData("doctors");
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const { editData } = useEditData("doctors");
 
   const { deleteData } = useDeleteData();
 
@@ -27,7 +27,7 @@ export function Doctors() {
 
   const handleDelete = async () => {
     if (doctorToDelete) {
-      await deleteData("doctors", doctorToDelete._id, () => rerender());
+      await deleteData("doctors", doctorToDelete, () => rerender());
       setIsModalOpen(false);
       setDoctorToDelete(null);
     }
@@ -46,19 +46,17 @@ export function Doctors() {
     setIsAddFormModalOpen(false);
   };
 
-    const handleEditClick = (doctor) => {
-      console.log(doctor)
+  const handleEditClick = (doctor) => {
     setSelectedDoctor(doctor);
     setIsModalOpen(true);
   };
-    
-    
+
   const handleSave = async (data) => {
     try {
-        await editData("doctors",selectedDoctor._id, data, "info");
+      await editData("doctors", selectedDoctor._id, data, "info");
       setIsModalOpen(false);
       setSelectedDoctor(null);
-      rerender(); 
+      rerender();
     } catch (error) {
       console.error("Error editing doctor:", error);
     }
@@ -96,15 +94,15 @@ export function Doctors() {
         ))}
       </div>
       {selectedDoctor && (
-      <EditInfoModal
-      dataInfo={selectedDoctor}
-      onSave={handleSave} 
-      onClose={() => {
-        setSelectedDoctor(null);
-        setIsModalOpen(false);
-      }}
-      resource="doctors"
-    />
+        <EditInfoModal
+          dataInfo={selectedDoctor}
+          onSave={handleSave}
+          onClose={() => {
+            setSelectedDoctor(null);
+            setIsModalOpen(false);
+          }}
+          resource="doctors"
+        />
       )}
       {isModalOpen && doctorToDelete && (
         <AlertModal
