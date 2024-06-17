@@ -29,6 +29,7 @@ export function AddFormModal({ resource, onClose, rerender }) {
       { name: "name", type: "text", placeholder: "Title of procedure" },
       { name: "duration", type: "number", placeholder: "Duration in minutes" },
       { name: "price", type: "number", placeholder: "Price" },
+      {name: "category", type: "text", placeholder: "Category"}
     ],
     appointments: [
       { name: "doctorName", type: "text", placeholder: "Doctor's name" },
