@@ -5,6 +5,9 @@ import { Button } from "../components/Button";
 import { ItemBox } from "../components/ItemBox";
 import { useEditData } from "../customHooks/useEditData";
 import { EditInfoModal } from "../components/EditInfoModal";
+import { useDeleteData } from "../customHooks/useDeleteData";
+import { AlertModal } from "../components/AlertModal";
+import { useNavigate } from "react-router-dom";
 
 export function PatientRecords() {
   const { patientID } = useParams();
@@ -19,32 +22,46 @@ export function PatientRecords() {
   const { editData } = useEditData("patients");
   const [isAddingCondition, setIsAddingCondition] = useState(false);
   const [conditionToEdit, setConditionToEdit] = useState(null);
+  const [patientToDelete, setPatientToDelete] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { deleteData } = useDeleteData();
+  const navigate = useNavigate();
 
   const handleEditPersonalInfoClick = () => {
     setIsEditModalOpen(true);
     setPatientToEdit(patient);
-    setIsAddingCondition(false); 
-    setConditionToEdit(null); 
+    setIsAddingCondition(false);
+    setConditionToEdit(null);
   };
 
-    const handleSave = async (data) => {
+  const handleSave = async (data) => {
     try {
       if (isAddingCondition) {
         const newCondition = {
           conditions: data.conditions,
           notes: data.notes,
         };
-        await editData("patients",patientToEdit._id, newCondition, "add-new-condition");
+        await editData(
+          "patients",
+          patientToEdit._id,
+          newCondition,
+          "add-new-condition"
+        );
         setIsAddingCondition(false);
       } else if (conditionToEdit) {
-        await editData("patients",patientToEdit._id, {
-          ...data,
-          conditions: data.conditions,
-          notes: data.notes
-        }, `conditions/${data._id}`);
+        await editData(
+          "patients",
+          patientToEdit._id,
+          {
+            ...data,
+            conditions: data.conditions,
+            notes: data.notes,
+          },
+          `conditions/${data._id}`
+        );
         setConditionToEdit(null);
       } else {
-        await editData("patients",patientToEdit._id, data, "info");
+        await editData("patients", patientToEdit._id, data, "info");
       }
 
       setIsEditModalOpen(false);
@@ -54,20 +71,40 @@ export function PatientRecords() {
     }
   };
 
-    const handleEditConditionClick = (condition) => {
-        setConditionToEdit(condition);
-        setPatientToEdit(patient)
+  const handleEditConditionClick = (condition) => {
+    setConditionToEdit(condition);
+    setPatientToEdit(patient);
     setIsEditModalOpen(true);
-    setIsAddingCondition(false); 
+    setIsAddingCondition(false);
+  };
+
+  const handleDeletePatientClick = () => {
+    setPatientToDelete(patient);
+    setIsModalOpen(true);
   };
 
   const handleDeleteConditionClick = () => {};
+
+  const handleDelete = async () => {
+    if (patientToDelete) {
+      await deleteData("patients", patientToDelete._id, () => {
+        setIsModalOpen(false);
+        setPatientToDelete(null);
+        navigate("/dentistry-clinic-admin/patients");
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setPatientToDelete(null);
+  };
 
   const handleAddConditionClick = () => {
     setPatientToEdit(patient);
     setIsAddingCondition(true);
     setIsEditModalOpen(true);
-    setConditionToEdit(null); 
+    setConditionToEdit(null);
   };
 
   useEffect(() => {
@@ -102,13 +139,17 @@ export function PatientRecords() {
             <Button
               buttonText={"EDIT INFO"}
               onClick={handleEditPersonalInfoClick}
-            />{" "}
+            />
+            <Button
+              buttonText={"DELETE PATIENT"}
+              onClick={handleDeletePatientClick}
+            />
           </div>
 
           <p>Date of Birth: {patient.dob}</p>
           <p>Phone: {patient.contactInfo.phone}</p>
           <p>Email: {patient.contactInfo.email}</p>
-          <p>Address: {patient.contactInfo.address}</p>
+          <p>Address: {patient.address}</p>
         </div>
         <div className="medical-history-container">
           <div className="header-wrapper">
@@ -142,6 +183,25 @@ export function PatientRecords() {
           onClose={() => setIsEditModalOpen(false)}
           isAddingCondition={isAddingCondition}
           conditionToEdit={conditionToEdit}
+        />
+      )}
+      {isModalOpen && patientToDelete && (
+        <AlertModal
+          isOpen={isModalOpen}
+          message={`Do you want to delete ${patientToDelete.name}?`}
+          onClose={handleCloseModal}
+          buttons={[
+            {
+              label: "Yes",
+              className: "confirm-button",
+              onClick: handleDelete,
+            },
+            {
+              label: "Cancel",
+              className: "cancel-button",
+              onClick: handleCloseModal,
+            },
+          ]}
         />
       )}
     </main>
