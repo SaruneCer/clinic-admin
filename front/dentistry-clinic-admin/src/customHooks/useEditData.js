@@ -1,23 +1,35 @@
 import { useState } from "react";
 
-const BASE_URL = "http://localhost:8080/dentistry_clinic_admin/";
+const BASE_URL = "http://localhost:8080/dentistry_clinic_admin";
 
-export function useEditData(resource) {
+export function useEditData() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const editData = async (id, formData, actionType) => { 
+  const editData = async (resource, item, formData, actionType) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}${resource}/${id}/${actionType}`, {
+      let url;
+
+      if (actionType === "add-new-condition") {
+        url = `${BASE_URL}/${resource}/${item}/${actionType}`;
+      } else if (actionType === "info") {
+        url = `${BASE_URL}/${resource}/${item}/${actionType}`;
+      } else {
+        url = `${BASE_URL}/${resource}/${item}/conditions/${formData._id}`;
+      }
+
+      const response = await fetch(url, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
+
       const data = await response.json();
       setIsLoading(false);
       return data;
