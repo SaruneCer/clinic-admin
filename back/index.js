@@ -538,35 +538,11 @@ app.get("/dentistry_clinic_admin/schedules", async (req, res) => {
   try {
     await connect();
     const collection = db.collection("schedules");
-    const pipeline = [
-      {
-        $lookup: {
-          from: "procedures",
-          localField: "procedureName",
-          foreignField: "name",
-          as: "procedure",
-        },
-      },
-      {
-        $unwind: "$procedure",
-      },
-      {
-        $project: {
-          doctorName: 1,
-          patientName: 1,
-          procedureName: 1,
-          price: "$procedure.price",
-          appointmentDate: 1,
-          comment: 1,
-        },
-      },
-    ];
-
-    const results = await collection.aggregate(pipeline).toArray();
-    res.send(results);
+    const results = await collection.find({}).toArray();
+    res.json(results);
   } catch (e) {
     console.error("Error fetching schedules:", e);
-    res.status(500).send("Internal server error");
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

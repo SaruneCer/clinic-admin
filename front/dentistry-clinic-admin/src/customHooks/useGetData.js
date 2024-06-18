@@ -24,7 +24,7 @@ export function useGetData(resource) {
           } else if (resource === 'appointments') {
             return item.doctorName && item.patientName && item.procedureName && item.report;
           } else if (resource === 'schedules') {
-            return item.doctorName && item.patientId && item.appointmentDate && item.status;
+            return item.title && item.start && item.end && item.description;
           }
           return true;
         });
