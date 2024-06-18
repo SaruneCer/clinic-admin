@@ -1,14 +1,14 @@
 import { Button } from "./Button";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../styles/edit-info-modal.css";
 
 export function EditInfoModal({
   dataInfo,
   onSave,
   onClose,
+  existingCategories = [],
   isAddingCondition,
-  conditionToEdit,
+  conditionToEdit
 }) {
   const [editedInfo, setEditedInfo] = useState(dataInfo);
   const [isEditing, setIsEditing] = useState(false);
@@ -49,49 +49,47 @@ export function EditInfoModal({
     setIsEditing(false);
   };
 
-    const handleSave = () => {
+  const handleSave = () => {
     onSave(editedInfo);
     setIsEditing(false);
   };
 
   const renderFormFields = (data, parentKey = null) => {
-    return Object.keys(data)
-      .map((key) => {
-        const value = data[key];
-        if (key === "_id" || key === "medicalHistory") {
-          return null;
-        }
-        if (
-          typeof value === "object" &&
-          !Array.isArray(value) &&
-          value !== null
-        ) {
-          return (
-            <div key={key} className="nested-form-group">
-              <h3>{key.charAt(0).toUpperCase() + key.slice(1)}</h3>
-              {renderFormFields(value, key)}
-            </div>
-          );
-        }
-
+    return Object.keys(data).map((key) => {
+      const value = data[key];
+      if (key === "_id" || key === "medicalHistory") {
+        return null;
+      }
+      if (
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        value !== null
+      ) {
         return (
-          <div className="edit-form-input" key={key}>
-            <label htmlFor={key}>
-              {key.charAt(0).toUpperCase() + key.slice(1)}:
-            </label>
-            <input
-              type={typeof value === "number" ? "number" : "text"}
-              id={key}
-              name={key}
-              value={value}
-              onChange={(e) => handleChange(e, parentKey)}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-            />
+          <div key={key} className="nested-form-group">
+            <h3>{key.charAt(0).toUpperCase() + key.slice(1)}</h3>
+            {renderFormFields(value, key)}
           </div>
         );
-      })
-      .filter(Boolean);
+      }
+
+      return (
+        <div className="edit-form-input" key={key}>
+          <label htmlFor={key}>
+            {key.charAt(0).toUpperCase() + key.slice(1)}:
+          </label>
+          <input
+            type={typeof value === "number" ? "number" : "text"}
+            id={key}
+            name={key}
+            value={value}
+            onChange={(e) => handleChange(e, parentKey)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          />
+        </div>
+      );
+    });
   };
 
   return (
@@ -117,7 +115,7 @@ export function EditInfoModal({
                   id="conditions"
                   name="conditions"
                   value={editedInfo.conditions || ""}
-                  onChange={handleChange}
+                  onChange={(e) => handleChange(e)}
                   onFocus={handleFocus}
                   onBlur={handleBlur}
                 />
@@ -128,7 +126,7 @@ export function EditInfoModal({
                   id="notes"
                   name="notes"
                   value={editedInfo.notes || ""}
-                  onChange={handleChange}
+                  onChange={(e) => handleChange(e)}
                   onFocus={handleFocus}
                   onBlur={handleBlur}
                 />
@@ -136,6 +134,40 @@ export function EditInfoModal({
             </>
           ) : (
             renderFormFields(editedInfo)
+          )}
+          {editedInfo.type === "procedure" && (
+            <div className="edit-form-input">
+              <label htmlFor="category">Category:</label>
+              <select
+                id="category"
+                name="category"
+                value={editedInfo.category || ""}
+                onChange={(e) => handleChange(e)}
+              >
+                <option value="">Select Category</option>
+                {existingCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+                <option value="addNewCategory">Add New Category</option>
+              </select>
+              {editedInfo.category === "addNewCategory" && (
+                <input
+                  type="text"
+                  placeholder="New category name"
+                  value={editedInfo.newCategory || ""}
+                  onChange={(e) =>
+                    setEditedInfo((prevInfo) => ({
+                      ...prevInfo,
+                      newCategory: e.target.value,
+                    }))
+                  }
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                />
+              )}
+            </div>
           )}
           <div className="modal-buttons">
             <Button buttonText="Save" onClick={handleSave} />

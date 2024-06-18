@@ -154,6 +154,7 @@ export function Procedures() {
                 setProcedureToEdit(null);
                 setIsEditModalOpen(false);
               }}
+              existingCategories={Object.keys(groupedProcedures)}
             />
           )}
           {isAddFormModalOpen && (
