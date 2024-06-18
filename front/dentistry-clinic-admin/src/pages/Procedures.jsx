@@ -13,12 +13,12 @@ export function Procedures() {
   const [groupedProcedures, setGroupedProcedures] = useState({});
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
-    const [procedureToEdit, setProcedureToEdit] = useState(null);
-    const [procedureToDelete, setProcedureToDelete] = useState(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const { editData } = useEditData();
-    const { deleteData } = useDeleteData();
+  const [procedureToEdit, setProcedureToEdit] = useState(null);
+  const [procedureToDelete, setProcedureToDelete] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { editData } = useEditData();
+  const { deleteData } = useDeleteData();
 
   useEffect(() => {
     if (procedures) {
@@ -43,7 +43,7 @@ export function Procedures() {
     setProcedureToDelete(procedure);
     setIsModalOpen(true);
   };
-    
+
   const handleDelete = async () => {
     if (procedureToDelete) {
       await deleteData("procedures", procedureToDelete, () => rerender());
@@ -77,7 +77,7 @@ export function Procedures() {
   };
 
   const toggleCategory = (category) => {
-    setExpandedCategory(expandedCategory === category ? null : category);
+    setExpandedCategory((prevCategory) => (prevCategory === category ? null : category));
   };
 
   if (loading) {
@@ -87,86 +87,102 @@ export function Procedures() {
   return (
     <main>
       <header>
-        <Button buttonText={"ADD PROCEDURE"} onClick={handleAddClick} />
+        <Button buttonText={"+ ADD PROCEDURE"} onClick={handleAddClick} />
       </header>
-
       <div className="procedures-container">
-        {Object.keys(groupedProcedures).map((category) => (
-          <div key={category} className="category">
-            <div className="category-header">
-              <h2>{category}</h2>
-              <i
-                className={`fas ${
+        <div className="procedures-wrapper">
+          {Object.keys(groupedProcedures).map((category) => (
+            <div key={category} className="category">
+              <div
+                className={
                   expandedCategory === category
-                    ? "fa-chevron-circle-up"
-                    : "fa-chevron-circle-down"
-                }`}
+                    ? "active-category-header"
+                    : "category-header"
+                }
                 onClick={() => toggleCategory(category)}
-              ></i>
-            </div>
-            {expandedCategory === category && (
-              <ul className="procedure-list">
-                {groupedProcedures[category].map((procedure) => (
-                  <li key={procedure._id} className="procedure-item">
-                    <div className="procedure-details">
+              >
+                <h2 className="category-title">{category}</h2>
+                <i
+                  className={`fas ${
+                    expandedCategory === category
+                      ? "fa-chevron-circle-up"
+                      : "fa-chevron-circle-down"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    toggleCategory(category);
+                  }}
+                ></i>
+              </div>
+              {expandedCategory === category && (
+                <ul className="procedure-list">
+                  {groupedProcedures[category].map((procedure) => (
+                    <li key={procedure._id} className="procedure-item">
                       <h3 className="procedure-name">{procedure.name}</h3>
-                      <span className="procedure-duration">
-                        Duration: {procedure.duration} min
-                      </span>
-                      <br />
-                      <span className="procedure-price">
-                        Price: {procedure.price} EUR
-                      </span>
-                    </div>
-                    <div className="procedure-buttons">
-                      <Button buttonText={"EDIT"} onClick={() => handleEditClick(procedure)} />
-                      <Button
-                        buttonText={"DELETE"}
-                        onClick={() => handleDeleteClick(procedure._id)}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ))}
-        {procedureToEdit && isEditModalOpen && (
-          <EditInfoModal
-            dataInfo={procedureToEdit}
-            onSave={handleSave}
-            onClose={() => {
-              setProcedureToEdit(null);
-              setIsEditModalOpen(false);
-            }}
-          />
-        )}
-        {isAddFormModalOpen && (
-          <AddFormModal
-            resource="procedures"
-            onClose={handleAddFormCloseModal}
-            rerender={rerender}
-          />
+                      <div className="procedure-details">
+                        <span className="procedure-duration">
+                          <i className="fas fa-clock"></i> {procedure.duration}{" "}
+                          min
+                        </span>
+                        <br />
+                        <span className="procedure-price">
+                          <i className="fas fa-money-bill-wave"></i>{" "}
+                          {procedure.price} EUR
+                        </span>
+                      </div>
+                      <div className="procedure-buttons">
+                        <Button
+                          buttonText={"EDIT"}
+                          onClick={() => handleEditClick(procedure)}
+                        />
+                        <Button
+                          buttonText={"DELETE"}
+                          onClick={() => handleDeleteClick(procedure._id)}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               )}
-                {isModalOpen && procedureToDelete && (
-        <AlertModal
-          isOpen={isModalOpen}
-          message={`Do you want to delete ${procedureToDelete.name} procedure?`}
-          onClose={handleCloseModal}
-          buttons={[
-            {
-              label: "Yes",
-              className: "confirm-button",
-              onClick: handleDelete,
-            },
-            {
-              label: "Cancel",
-              className: "cancel-button",
-              onClick: handleCloseModal,
-            },
-          ]}
-        />
-      )}
+            </div>
+          ))}
+          {procedureToEdit && isEditModalOpen && (
+            <EditInfoModal
+              dataInfo={procedureToEdit}
+              onSave={handleSave}
+              onClose={() => {
+                setProcedureToEdit(null);
+                setIsEditModalOpen(false);
+              }}
+            />
+          )}
+          {isAddFormModalOpen && (
+            <AddFormModal
+              resource="procedures"
+              onClose={handleAddFormCloseModal}
+              rerender={rerender}
+            />
+          )}
+          {isModalOpen && procedureToDelete && (
+            <AlertModal
+              isOpen={isModalOpen}
+              message={`Do you want to delete ${procedureToDelete.name} procedure?`}
+              onClose={handleCloseModal}
+              buttons={[
+                {
+                  label: "Yes",
+                  className: "confirm-button",
+                  onClick: handleDelete,
+                },
+                {
+                  label: "Cancel",
+                  className: "cancel-button",
+                  onClick: handleCloseModal,
+                },
+              ]}
+            />
+          )}
+        </div>
       </div>
     </main>
   );
