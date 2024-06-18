@@ -77,7 +77,9 @@ export function Procedures() {
   };
 
   const toggleCategory = (category) => {
-    setExpandedCategory((prevCategory) => (prevCategory === category ? null : category));
+    setExpandedCategory((prevCategory) =>
+      prevCategory === category ? null : category
+    );
   };
 
   if (loading) {
@@ -109,7 +111,7 @@ export function Procedures() {
                       : "fa-chevron-circle-down"
                   }`}
                   onClick={(e) => {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     toggleCategory(category);
                   }}
                 ></i>
@@ -162,6 +164,7 @@ export function Procedures() {
               resource="procedures"
               onClose={handleAddFormCloseModal}
               rerender={rerender}
+              existingCategories={Object.keys(groupedProcedures)}
             />
           )}
           {isModalOpen && procedureToDelete && (

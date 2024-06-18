@@ -8,10 +8,10 @@ export function EditInfoModal({
   onClose,
   existingCategories = [],
   isAddingCondition,
-  conditionToEdit
+  conditionToEdit,
 }) {
   const [editedInfo, setEditedInfo] = useState(dataInfo);
-  const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (isAddingCondition) {
@@ -41,14 +41,6 @@ export function EditInfoModal({
     }
   };
 
-  const handleFocus = () => {
-    setIsEditing(true);
-  };
-
-  const handleBlur = () => {
-    setIsEditing(false);
-  };
-
   const handleSave = () => {
     onSave(editedInfo);
     setIsEditing(false);
@@ -57,7 +49,7 @@ export function EditInfoModal({
   const renderFormFields = (data, parentKey = null) => {
     return Object.keys(data).map((key) => {
       const value = data[key];
-      if (key === "_id" || key === "medicalHistory") {
+      if (key === "_id" || key === "medicalHistory" || key === "category") {
         return null;
       }
       if (
@@ -84,14 +76,14 @@ export function EditInfoModal({
             name={key}
             value={value}
             onChange={(e) => handleChange(e, parentKey)}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
           />
         </div>
       );
     });
   };
 
+
+    
   return (
     <div className="modal">
       <div className={`modal-content ${isEditing ? "is-editing" : ""}`}>
@@ -106,7 +98,8 @@ export function EditInfoModal({
             : "Edit Information"}
         </h2>
         <form className="edit-form">
-          {isAddingCondition || conditionToEdit ? (
+                  {isAddingCondition || conditionToEdit ? (
+                      
             <>
               <div className="edit-form-input">
                 <label htmlFor="conditions">Condition:</label>
@@ -116,8 +109,6 @@ export function EditInfoModal({
                   name="conditions"
                   value={editedInfo.conditions || ""}
                   onChange={(e) => handleChange(e)}
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
                 />
               </div>
               <div className="edit-form-input">
@@ -127,17 +118,14 @@ export function EditInfoModal({
                   name="notes"
                   value={editedInfo.notes || ""}
                   onChange={(e) => handleChange(e)}
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
                 />
               </div>
             </>
           ) : (
             renderFormFields(editedInfo)
           )}
-          {editedInfo.type === "procedure" && (
-            <div className="edit-form-input">
-              <label htmlFor="category">Category:</label>
+          {existingCategories.length > 0 && (
+            <div className="edit-form-selection">
               <select
                 id="category"
                 name="category"
@@ -163,8 +151,6 @@ export function EditInfoModal({
                       newCategory: e.target.value,
                     }))
                   }
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
                 />
               )}
             </div>
