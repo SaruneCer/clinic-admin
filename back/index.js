@@ -299,7 +299,6 @@ app.patch(
 
       const collection = db.collection("patients");
 
-
       await collection.updateOne(
         {
           _id: new ObjectId(patientId),
@@ -313,12 +312,10 @@ app.patch(
         }
       );
 
-      res
-        .status(200)
-        .json({
-          message: "Medical condition updated successfully",
-          conditionId,
-        });
+      res.status(200).json({
+        message: "Medical condition updated successfully",
+        conditionId,
+      });
     } catch (e) {
       console.error("Error updating medical condition:", e);
       res.status(500).json({ error: "Internal server error" });
@@ -343,12 +340,10 @@ app.patch(
         { $pull: { medicalHistory: { _id: conditionObjectId } } }
       );
 
-      res
-        .status(200)
-        .json({
-          message: "Medical condition deleted successfully",
-          conditionId,
-        });
+      res.status(200).json({
+        message: "Medical condition deleted successfully",
+        conditionId,
+      });
     } catch (e) {
       console.error("Error deleting medical condition:", e);
       res.status(500).json({ error: "Internal server error" });
@@ -409,7 +404,7 @@ app.post("/dentistry_clinic_admin/procedures/", async (req, res) => {
 
 app.patch("/dentistry_clinic_admin/procedures/:id/info", async (req, res) => {
   try {
-    await connect();
+    await connect(); 
     const objectId = new ObjectId(req.params.id);
     const collection = db.collection("procedures");
     const editedInfo = req.body;
@@ -423,6 +418,9 @@ app.patch("/dentistry_clinic_admin/procedures/:id/info", async (req, res) => {
     }
     if (editedInfo.price) {
       updateFields.price = editedInfo.price;
+    }
+    if (editedInfo.category) {
+      updateFields.category = editedInfo.category;
     }
 
     const result = await collection.updateOne(
