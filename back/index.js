@@ -552,8 +552,6 @@ app.post("/dentistry_clinic_admin/schedules/", async (req, res) => {
     const collection = db.collection("schedules");
     const newSchedule = req.body;
 
-    // Validation
-
     const result = await collection.insertOne(newSchedule);
     res.json({
       message: "Schedule added successfully",
@@ -565,25 +563,31 @@ app.post("/dentistry_clinic_admin/schedules/", async (req, res) => {
   }
 });
 
-app.patch("/dentistry_clinic_admin/schedules/:id", async (req, res) => {
+app.patch('/dentistry_clinic_admin/schedules/:id/info', async (req, res) => {
   try {
-    await connect();
+    await connect(); 
     const objectId = new ObjectId(req.params.id);
-    const collection = db.collection("schedules");
+    const collection = db.collection('schedules');
     const editedInfo = req.body;
 
     const updateFields = {};
-    if (editedInfo.doctorName) {
-      updateFields.doctorName = editedInfo.doctorName;
+    if (editedInfo.doctorID) {
+      updateFields.doctorID = editedInfo.doctorID;
     }
-    if (editedInfo.patientName) {
-      updateFields.patientName = editedInfo.patientName;
+    if (editedInfo.title) {
+      updateFields.title = editedInfo.title;
     }
-    if (editedInfo.procedureName) {
-      updateFields.procedureName = editedInfo.procedureName;
+    if (editedInfo.start) {
+      updateFields.start = new Date(editedInfo.start);
     }
-    if (editedInfo.comment) {
-      updateFields.comment = editedInfo.comment;
+    if (editedInfo.end) {
+      updateFields.end = new Date(editedInfo.end);
+    }
+    if (editedInfo.data && editedInfo.data.procedure) {
+      updateFields['data.procedure'] = editedInfo.data.procedure;
+    }
+    if (editedInfo.data && editedInfo.data.comment) {
+      updateFields['data.comment'] = editedInfo.data.comment;
     }
 
     const result = await collection.updateOne(
@@ -592,13 +596,13 @@ app.patch("/dentistry_clinic_admin/schedules/:id", async (req, res) => {
     );
 
     if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Schedule not found" });
+      return res.status(404).json({ error: 'Schedule not found' });
     }
 
-    res.json({ message: "Schedule information updated successfully" });
+    res.json({ message: 'Schedule information updated successfully' });
   } catch (e) {
-    console.error("Error editing schedule information:", e);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error editing schedule information:', e);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
