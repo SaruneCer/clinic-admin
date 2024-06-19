@@ -16,15 +16,21 @@ export function Home() {
 
   useEffect(() => {
     if (!schedules) return;
-    
+
     const filteredEvents = schedules
-      .filter(schedule => !selectedDoctorID || schedule.doctorID === selectedDoctorID)
-      .map(schedule => ({
-        title: schedule.title || "Untitled", 
-        start: new Date(schedule.start), 
-        end: new Date(schedule.end), 
+      .filter(
+        (schedule) =>
+          !selectedDoctorID || schedule.doctorID === selectedDoctorID
+      )
+      .map((schedule) => ({
+        title: schedule.title || "Untitled",
+        start: new Date(schedule.start),
+        end: new Date(schedule.end),
         allDay: false,
-        tooltipAccessor: schedule.description,
+        data: {
+          procedure: schedule.data.procedure,
+          comment: schedule.data.comment,
+        },
       }));
 
     setEvents(filteredEvents);
@@ -44,9 +50,40 @@ export function Home() {
 
   const now = new Date();
 
-  return (
+  const formats = {
+    timeGutterFormat: "HH:mm",
+    eventTimeRangeFormat: ({ start, end }, culture, localizer) =>
+      `${localizer.format(start, "HH:mm", culture)} - ${localizer.format(
+        end,
+        "HH:mm",
+        culture
+      )}`,
+    agendaTimeRangeFormat: ({ start, end }, culture, localizer) =>
+      `${localizer.format(start, "HH:mm", culture)} - ${localizer.format(
+        end,
+        "HH:mm",
+        culture
+      )}`,
+    dayHeaderFormat: "dddd (MMMM D)",
+    dayRangeHeaderFormat: ({ start, end }, culture, localizer) =>
+      `${localizer.format(
+        start,
+        "dddd (MMMM D)",
+        culture
+      )} - ${localizer.format(end, "dddd (MMMM D)", culture)}`,
+  };
+
+  const EventComponent = ({ event }) => (
+    <div>
+      <h3 className="patient-name">{event.title}</h3>
+      <p className="procedure-title">{event.data?.procedure}</p>{" "}
+      <p className="procedure-comment">{event.data?.comment}</p>
+    </div>
+  );
+
+    return (
+      <main>
     <div className="home">
-      <h1>Schedule</h1>
 
       <div>
         <label htmlFor="doctorSelect">Select Doctor: </label>
@@ -70,7 +107,7 @@ export function Home() {
         startAccessor="start"
         endAccessor="end"
         style={{ height: 600 }}
-        defaultView={Views.WORK_WEEK} 
+        defaultView={Views.WORK_WEEK}
         views={{ work_week: true, day: true, month: true }}
         step={15}
         timeslots={1}
@@ -79,8 +116,14 @@ export function Home() {
         tooltipAccessor={(event) => event.tooltipAccessor}
         showCurrentTimeIndicator={true}
         now={now}
+        selectable
         scrollToTime={now}
+        formats={formats}
+        components={{
+          event: EventComponent,
+        }}
       />
-    </div>
+            </div>
+            </main>
   );
 }
