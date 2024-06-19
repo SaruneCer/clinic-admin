@@ -24,7 +24,8 @@ export function useGetData(resource) {
           } else if (resource === 'appointments') {
             return item.doctorName && item.patientName && item.procedureName && item.report;
           } else if (resource === 'schedules') {
-            return item.title && item.start && item.end && item.description;
+            // Validate the 'schedules' resource based on the new MongoDB data structure
+            return item.title && item.start && item.end && item.doctorID && item.data?.procedure;
           }
           return true;
         });
