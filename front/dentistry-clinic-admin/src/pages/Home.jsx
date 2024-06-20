@@ -18,30 +18,7 @@ export function Home() {
   const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
-
-  const handleOpenAddModal = (slotInfo) => {
-    const isOverlapping = events.some(
-      (event) =>
-        (slotInfo.start >= event.start && slotInfo.start < event.end) ||
-        (slotInfo.end > event.start && slotInfo.end <= event.end) ||
-        (slotInfo.start <= event.start && slotInfo.end >= event.end)
-    );
-
-    if (!isOverlapping) {
-      setSelectedSlot({ ...slotInfo, selectedDoctorID });
-      setIsAddFormModalOpen(true);
-    } else {
-      setIsAlertModalOpen(true);
-    }
-  };
-
-  const handleCloseAddModal = () => {
-    setIsAddFormModalOpen(false);
-  };
-
-  const handleCloseAlertModal = () => {
-    setIsAlertModalOpen(false);
-  };
+  const [view, setView] = useState(Views.DAY); 
 
   useEffect(() => {
     if (!schedules) return;
@@ -60,13 +37,51 @@ export function Home() {
           procedure: schedule.data.procedure,
           comment: schedule.data.comment,
         },
+        resourceId: selectedDoctorID ? selectedDoctorID : schedule.doctorID,
       }));
 
     setEvents(filteredEvents);
   }, [schedules, selectedDoctorID]);
 
   const handleDoctorChange = (event) => {
-    setSelectedDoctorID(event.target.value);
+    const doctorID = event.target.value;
+    setSelectedDoctorID(doctorID);
+
+    if (doctorID) {
+      setView(Views.WORK_WEEK); 
+    } else {
+      setView(Views.DAY); 
+    }
+  };
+
+  const handleViewChange = (newView) => {
+    setView(newView);
+  };
+
+  const handleOpenAddModal = (slotInfo) => {
+    const isOverlapping = events.some((event) => {
+      return (
+        event.resourceId === slotInfo.resourceId &&
+        ((slotInfo.start >= event.start && slotInfo.start < event.end) ||
+          (slotInfo.end > event.start && slotInfo.end <= event.end) ||
+          (slotInfo.start <= event.start && slotInfo.end >= event.end))
+      );
+    });
+
+    if (!isOverlapping) {
+      setSelectedSlot(slotInfo);
+      setIsAddFormModalOpen(true);
+    } else {
+      setIsAlertModalOpen(true);
+    }
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddFormModalOpen(false);
+  };
+
+  const handleCloseAlertModal = () => {
+    setIsAlertModalOpen(false);
   };
 
   if (loading || !doctors) {
@@ -102,13 +117,28 @@ export function Home() {
       )} - ${localizer.format(end, "dddd (MMMM D)", culture)}`,
   };
 
-  const EventComponent = ({ event }) => (
-    <div>
-      <h3 className="patient-name">{event.title}</h3>
-      <p className="procedure-title">{event.data?.procedure}</p>{" "}
-      <p className="procedure-comment">{event.data?.comment}</p>
-    </div>
-  );
+  const EventComponent = ({ event }) => {
+    if (!event || !event.title) return null;
+    return (
+      <div>
+        <h3 className="patient-name">{event.title}</h3>
+        <p className="procedure-title">{event.data?.procedure}</p>
+        <p className="procedure-comment">{event.data?.comment}</p>
+      </div>
+    );
+  };
+
+  const resources = selectedDoctorID
+    ? doctors
+        .filter((doctor) => doctor._id === selectedDoctorID)
+        .map((doctor) => ({
+          id: doctor._id,
+          title: doctor.name,
+        }))
+    : doctors.map((doctor) => ({
+        id: doctor._id,
+        title: doctor.name,
+      }));
 
   return (
     <main>
@@ -132,16 +162,22 @@ export function Home() {
         <Calendar
           localizer={localizer}
           events={events}
+          resources={resources}
+          resourceIdAccessor="id"
+          resourceTitleAccessor="title"
           startAccessor="start"
           endAccessor="end"
           style={{ height: 600 }}
-          defaultView={Views.WORK_WEEK}
-          views={{ work_week: true, day: true, month: true }}
+          view={view} 
+          views={
+            selectedDoctorID
+              ? { day: true, work_week: true, month: true }
+              : { day: true }
+          }
           step={15}
           timeslots={1}
           min={new Date(new Date().setHours(8, 0, 0))}
           max={new Date(new Date().setHours(17, 0, 0))}
-          tooltipAccessor={(event) => event.tooltipAccessor}
           showCurrentTimeIndicator={true}
           now={now}
           selectable
@@ -151,6 +187,7 @@ export function Home() {
           components={{
             event: EventComponent,
           }}
+          onView={handleViewChange} 
         />
         {isAddFormModalOpen && (
           <AddFormModal
@@ -164,7 +201,7 @@ export function Home() {
         {isAlertModalOpen && (
           <AlertModal
             isOpen={isAlertModalOpen}
-            message={`Your selected time overlaps with existing appointment, please choose another time.`}
+            message={`Your selected time overlaps with an existing appointment, please choose another time.`}
             onClose={handleCloseAlertModal}
             buttons={[
               {

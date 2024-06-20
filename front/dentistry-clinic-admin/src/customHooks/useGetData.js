@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 const BASE_URL = "http://localhost:8080/dentistry_clinic_admin/";
 
 export function useGetData(resource) {
-  const [data, setData] = useState(null); 
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -17,15 +17,28 @@ export function useGetData(resource) {
 
       if (Array.isArray(result)) {
         const validData = result.filter((item) => {
-          if (resource === 'doctors' || resource === 'patients') {
-            return item.name && item.contactInfo?.email && item.contactInfo?.phone;
-          } else if (resource === 'procedures') {
+          if (resource === "doctors" || resource === "patients") {
+            return (
+              item.name && item.contactInfo?.email && item.contactInfo?.phone
+            );
+          } else if (resource === "procedures") {
             return item.name && item.duration && item.price;
-          } else if (resource === 'appointments') {
-            return item.doctorName && item.patientName && item.procedureName && item.report;
-          } else if (resource === 'schedules') {
-            // Validate the 'schedules' resource based on the new MongoDB data structure
-            return item.title && item.start && item.end && item.doctorID && item.data?.procedure;
+          } else if (resource === "appointments") {
+            return (
+              item.doctorName &&
+              item.patientName &&
+              item.procedureName &&
+              item.report
+            );
+          } else if (resource === "schedules") {
+            return (
+              item.title &&
+              item.start &&
+              item.end &&
+              item.doctorID &&
+              item.data?.procedure &&
+              item.data?.comment
+            );
           }
           return true;
         });
