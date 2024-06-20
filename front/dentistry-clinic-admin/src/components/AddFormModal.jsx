@@ -3,7 +3,13 @@ import { Button } from "./Button";
 import { usePostData } from "../customHooks/usePostData";
 import "../styles/add-form-modal.css";
 
-export function AddFormModal({ resource, onClose, rerender, existingCategories = [] }) {
+export function AddFormModal({
+  resource,
+  onClose,
+  rerender,
+  existingCategories = [],
+  slotInfo,
+}) {
   const fieldConfigurations = {
     doctors: [
       { name: "name", type: "text", placeholder: "Name Lastname" },
@@ -29,7 +35,7 @@ export function AddFormModal({ resource, onClose, rerender, existingCategories =
       { name: "name", type: "text", placeholder: "Title of procedure" },
       { name: "duration", type: "number", placeholder: "Duration in minutes" },
       { name: "price", type: "number", placeholder: "Price" },
-      { name: "category", type: "select", placeholder: "Category" }
+      { name: "category", type: "select", placeholder: "Category" },
     ],
     appointments: [
       { name: "doctorName", type: "text", placeholder: "Doctor's name" },
@@ -38,15 +44,8 @@ export function AddFormModal({ resource, onClose, rerender, existingCategories =
       { name: "report", type: "text", placeholder: "Report" },
     ],
     schedules: [
-      { name: "doctorName", type: "text", placeholder: "Doctor's name" },
-      { name: "patientId", type: "text", placeholder: "Patient's ID" },
-      {
-        name: "appointmentDate",
-        type: "datetime-local",
-        placeholder: "Appointment date and time",
-      },
+      { name: "patientName", type: "text", placeholder: "Patient's name" },
       { name: "procedureName", type: "text", placeholder: "Procedure name" },
-      { name: "status", type: "text", placeholder: "Status" },
       { name: "comment", type: "text", placeholder: "Comment" },
     ],
   };
@@ -55,13 +54,34 @@ export function AddFormModal({ resource, onClose, rerender, existingCategories =
   const [errors, setErrors] = useState({});
   const { postData, isLoading } = usePostData(resource);
 
+  const formatDateAndTime = (date) => {
+    const pad = (number) => number.toString().padStart(2, "0");
+
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+
+    const timezoneOffset = -date.getTimezoneOffset();
+    const sign = timezoneOffset >= 0 ? "+" : "-";
+    const offsetHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
+    const offsetMinutes = pad(Math.abs(timezoneOffset) % 60);
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${offsetHours}:${offsetMinutes}`;
+  };
+
   const fields = fieldConfigurations[resource] || [];
 
   const validateForm = () => {
     const newErrors = {};
 
     fields.forEach((field) => {
-      if (resource === "patients" && (field.name === "conditions" || field.name === "notes")) {
+      if (
+        resource === "patients" &&
+        (field.name === "conditions" || field.name === "notes")
+      ) {
         return;
       }
       if (!formData[field.name]) {
@@ -90,7 +110,6 @@ export function AddFormModal({ resource, onClose, rerender, existingCategories =
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -98,34 +117,32 @@ export function AddFormModal({ resource, onClose, rerender, existingCategories =
       return;
     }
 
-    const adjustedFormData = { ...formData };
-
-    if (resource === "doctors" || resource === "patients") {
-      adjustedFormData.contactInfo = {
-        phone: adjustedFormData.phone,
-        email: adjustedFormData.email,
-      };
-      delete adjustedFormData.phone;
-      delete adjustedFormData.email;
-    }
-    if (resource === "patients") {
-      adjustedFormData.medicalHistory = [
-        {
-          conditions: adjustedFormData.conditions,
-          notes: adjustedFormData.notes,
-        },
-      ];
-      delete adjustedFormData.conditions;
-      delete adjustedFormData.notes;
-    }
-
-    if (resource === "procedures" && formData.category === "addNewCategory") {
-      adjustedFormData.category = formData.newCategory;
-      delete adjustedFormData.newCategory;
-    }
-
     try {
-      await postData(adjustedFormData);
+      let structuredData = { ...formData };
+
+      if (resource === "schedules" && slotInfo) {
+        if (slotInfo.selectedDoctorID) {
+          structuredData.doctorID = slotInfo.selectedDoctorID;
+        }
+
+        if (slotInfo.start && slotInfo.end) {
+          structuredData.start = formatDateAndTime(new Date(slotInfo.start));
+          structuredData.end = formatDateAndTime(new Date(slotInfo.end));
+        }
+
+        structuredData.title = formData.patientName;
+        structuredData.data = {
+          procedure: formData.procedureName,
+          comment: formData.comment,
+        };
+
+        delete structuredData.procedureName;
+        delete structuredData.comment;
+        delete structuredData.patientName;
+      }
+
+      console.log(structuredData);
+      await postData(structuredData);
       rerender();
       onClose();
     } catch (error) {
@@ -148,51 +165,53 @@ export function AddFormModal({ resource, onClose, rerender, existingCategories =
           &times;
         </span>
         <form>
-          {fields.map((field) => (
-            <div className="input-wrapper" key={field.name}>
-              {field.type === "select" ? (
-                <>
-                  <select
+          {fields.map((field) =>
+            field.name === "selectedDoctorID" ? null : (
+              <div className="input-wrapper" key={field.name}>
+                {field.type === "select" ? (
+                  <>
+                    <select
+                      name={field.name}
+                      value={formData[field.name] || ""}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Category</option>
+                      {existingCategories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                      <option value="addNewCategory">Add New Category</option>
+                    </select>
+                    {formData.category === "addNewCategory" && (
+                      <input
+                        type="text"
+                        placeholder="New category name"
+                        value={formData.newCategory || ""}
+                        onChange={(e) =>
+                          setFormData((prevData) => ({
+                            ...prevData,
+                            newCategory: e.target.value,
+                          }))
+                        }
+                      />
+                    )}
+                  </>
+                ) : (
+                  <input
+                    type={field.type}
                     name={field.name}
+                    placeholder={field.placeholder}
                     value={formData[field.name] || ""}
                     onChange={handleChange}
-                  >
-                    <option value="">Select Category</option>
-                    {existingCategories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                    <option value="addNewCategory">Add New Category</option>
-                  </select>
-                  {formData.category === "addNewCategory" && (
-                    <input
-                      type="text"
-                      placeholder="New category name"
-                      value={formData.newCategory || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          newCategory: e.target.value,
-                        }))
-                      }
-                    />
-                  )}
-                </>
-              ) : (
-                <input
-                  type={field.type}
-                  name={field.name}
-                  placeholder={field.placeholder}
-                  value={formData[field.name] || ""}
-                  onChange={handleChange}
-                />
-              )}
-              {errors[field.name] && (
-                <p className="error-message">{errors[field.name]}</p>
-              )}
-            </div>
-          ))}
+                  />
+                )}
+                {errors[field.name] && (
+                  <p className="error-message">{errors[field.name]}</p>
+                )}
+              </div>
+            )
+          )}
           <Button
             buttonText="Add"
             disabled={isLoading}

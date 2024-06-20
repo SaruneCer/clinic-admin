@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useGetData } from "../customHooks/useGetData";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
+import { AddFormModal } from "../components/AddFormModal";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../styles/customCalendar.css";
@@ -8,11 +9,21 @@ import "../styles/customCalendar.css";
 const localizer = momentLocalizer(moment);
 
 export function Home() {
-  const { data: schedules, loading } = useGetData("schedules");
+  const { data: schedules, loading, rerender } = useGetData("schedules");
   const { data: doctors } = useGetData("doctors");
 
   const [selectedDoctorID, setSelectedDoctorID] = useState("");
   const [events, setEvents] = useState([]);
+  const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+
+  const openAddModal = (slotInfo) => {
+    setSelectedSlot({ ...slotInfo, selectedDoctorID });
+    setIsAddFormModalOpen(true);
+  };
+  const closeAddModal = () => {
+    setIsAddFormModalOpen(false);
+  };
 
   useEffect(() => {
     if (!schedules) return;
@@ -81,49 +92,58 @@ export function Home() {
     </div>
   );
 
-    return (
-      <main>
-    <div className="home">
+  return (
+    <main>
+      <div className="home">
+        <div>
+          <label htmlFor="doctorSelect">Select Doctor: </label>
+          <select
+            id="doctorSelect"
+            onChange={handleDoctorChange}
+            value={selectedDoctorID}
+          >
+            <option value="">All Doctors</option>
+            {doctors.map((doctor) => (
+              <option key={doctor._id} value={doctor._id}>
+                {doctor.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div>
-        <label htmlFor="doctorSelect">Select Doctor: </label>
-        <select
-          id="doctorSelect"
-          onChange={handleDoctorChange}
-          value={selectedDoctorID}
-        >
-          <option value="">All Doctors</option>
-          {doctors.map((doctor) => (
-            <option key={doctor._id} value={doctor._id}>
-              {doctor.name}
-            </option>
-          ))}
-        </select>
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: 600 }}
+          defaultView={Views.WORK_WEEK}
+          views={{ work_week: true, day: true, month: true }}
+          step={15}
+          timeslots={1}
+          min={new Date(new Date().setHours(8, 0, 0))}
+          max={new Date(new Date().setHours(17, 0, 0))}
+          tooltipAccessor={(event) => event.tooltipAccessor}
+          showCurrentTimeIndicator={true}
+          now={now}
+          selectable
+          onSelectSlot={openAddModal}
+          scrollToTime={now}
+          formats={formats}
+          components={{
+            event: EventComponent,
+          }}
+        />
+        {isAddFormModalOpen && (
+          <AddFormModal
+            resource="schedules"
+            onClose={closeAddModal}
+            rerender={rerender}
+            existingCategories={[]}
+            slotInfo={selectedSlot}
+          />
+        )}
       </div>
-
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 600 }}
-        defaultView={Views.WORK_WEEK}
-        views={{ work_week: true, day: true, month: true }}
-        step={15}
-        timeslots={1}
-        min={new Date(new Date().setHours(8, 0, 0))}
-        max={new Date(new Date().setHours(17, 0, 0))}
-        tooltipAccessor={(event) => event.tooltipAccessor}
-        showCurrentTimeIndicator={true}
-        now={now}
-        selectable
-        scrollToTime={now}
-        formats={formats}
-        components={{
-          event: EventComponent,
-        }}
-      />
-            </div>
-            </main>
+    </main>
   );
 }
