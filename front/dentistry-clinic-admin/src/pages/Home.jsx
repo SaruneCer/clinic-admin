@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useGetData } from "../customHooks/useGetData";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import { AddFormModal } from "../components/AddFormModal";
+import { AlertModal } from "../components/AlertModal";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../styles/customCalendar.css";
@@ -16,13 +17,30 @@ export function Home() {
   const [events, setEvents] = useState([]);
   const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
 
-  const openAddModal = (slotInfo) => {
-    setSelectedSlot({ ...slotInfo, selectedDoctorID });
-    setIsAddFormModalOpen(true);
+  const handleOpenAddModal = (slotInfo) => {
+    const isOverlapping = events.some(
+      (event) =>
+        (slotInfo.start >= event.start && slotInfo.start < event.end) ||
+        (slotInfo.end > event.start && slotInfo.end <= event.end) ||
+        (slotInfo.start <= event.start && slotInfo.end >= event.end)
+    );
+
+    if (!isOverlapping) {
+      setSelectedSlot({ ...slotInfo, selectedDoctorID });
+      setIsAddFormModalOpen(true);
+    } else {
+      setIsAlertModalOpen(true);
+    }
   };
-  const closeAddModal = () => {
+
+  const handleCloseAddModal = () => {
     setIsAddFormModalOpen(false);
+  };
+
+  const handleCloseAlertModal = () => {
+    setIsAlertModalOpen(false);
   };
 
   useEffect(() => {
@@ -127,7 +145,7 @@ export function Home() {
           showCurrentTimeIndicator={true}
           now={now}
           selectable
-          onSelectSlot={openAddModal}
+          onSelectSlot={handleOpenAddModal}
           scrollToTime={now}
           formats={formats}
           components={{
@@ -137,10 +155,24 @@ export function Home() {
         {isAddFormModalOpen && (
           <AddFormModal
             resource="schedules"
-            onClose={closeAddModal}
+            onClose={handleCloseAddModal}
             rerender={rerender}
             existingCategories={[]}
             slotInfo={selectedSlot}
+          />
+        )}
+        {isAlertModalOpen && (
+          <AlertModal
+            isOpen={isAlertModalOpen}
+            message={`Your selected time overlaps with existing appointment, please choose another time.`}
+            onClose={handleCloseAlertModal}
+            buttons={[
+              {
+                label: "Close",
+                className: "cancel-button",
+                onClick: handleCloseAlertModal,
+              },
+            ]}
           />
         )}
       </div>
