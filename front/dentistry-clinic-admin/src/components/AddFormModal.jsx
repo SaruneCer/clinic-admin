@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { usePostData } from "../customHooks/usePostData";
 import "../styles/add-form-modal.css";
@@ -47,12 +47,35 @@ export function AddFormModal({
       { name: "patientName", type: "text", placeholder: "Patient's name" },
       { name: "procedureName", type: "text", placeholder: "Procedure name" },
       { name: "comment", type: "text", placeholder: "Comment" },
+      { name: "start", type: "datetime-local", placeholder: "Start Date and Time" },
+      { name: "end", type: "datetime-local", placeholder: "End Date and Time" },
     ],
   };
 
-  const [formData, setFormData] = useState({});
+  const toDateTimeLocalString = (date) => {
+    const pad = (num) => String(num).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  const initialFormData = resource === 'schedules' && slotInfo ? {
+    start: slotInfo.start ? toDateTimeLocalString(new Date(slotInfo.start)) : '',
+    end: slotInfo.end ? toDateTimeLocalString(new Date(slotInfo.end)) : ''
+  } : {};
+
+  const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
   const { postData, isLoading } = usePostData(resource);
+
+  // Update formData with slotInfo when the modal is opened
+  useEffect(() => {
+    if (resource === 'schedules' && slotInfo) {
+      setFormData((prevData) => ({
+        ...prevData,
+        start: slotInfo.start ? toDateTimeLocalString(new Date(slotInfo.start)) : '',
+        end: slotInfo.end ? toDateTimeLocalString(new Date(slotInfo.end)) : ''
+      }));
+    }
+  }, [slotInfo, resource]);
 
   const formatDateAndTime = (date) => {
     const pad = (number) => number.toString().padStart(2, "0");
@@ -106,10 +129,18 @@ export function AddFormModal({
         newErrors[phoneField.name] = "Number invalid";
       }
     }
+    if (resource === "schedules") {
+      const { start, end } = formData;
+      if (new Date(start) >= new Date(end)) {
+        newErrors.start = "Start time must be before end time";
+        newErrors.end = "End time must be after start time";
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -120,14 +151,14 @@ export function AddFormModal({
     try {
       let structuredData = { ...formData };
 
-      if (resource === "schedules" && slotInfo) {
-        if (slotInfo.selectedDoctorID) {
-          structuredData.doctorID = slotInfo.selectedDoctorID;
+      if (resource === "schedules") {
+        if (slotInfo?.resourceId) {
+          structuredData.doctorID = slotInfo.resourceId;
         }
 
-        if (slotInfo.start && slotInfo.end) {
-          structuredData.start = formatDateAndTime(new Date(slotInfo.start));
-          structuredData.end = formatDateAndTime(new Date(slotInfo.end));
+        if (formData.start && formData.end) {
+          structuredData.start = formatDateAndTime(new Date(formData.start));
+          structuredData.end = formatDateAndTime(new Date(formData.end));
         }
 
         structuredData.title = formData.patientName;

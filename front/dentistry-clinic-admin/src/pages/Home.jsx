@@ -18,7 +18,7 @@ export function Home() {
   const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
-  const [view, setView] = useState(Views.DAY); 
+  const [view, setView] = useState(Views.DAY);
 
   useEffect(() => {
     if (!schedules) return;
@@ -48,9 +48,9 @@ export function Home() {
     setSelectedDoctorID(doctorID);
 
     if (doctorID) {
-      setView(Views.WORK_WEEK); 
+      setView(Views.WORK_WEEK);
     } else {
-      setView(Views.DAY); 
+      setView(Views.DAY);
     }
   };
 
@@ -122,8 +122,11 @@ export function Home() {
     return (
       <div>
         <h3 className="patient-name">{event.title}</h3>
-        <p className="procedure-title">{event.data?.procedure}</p>
-        <p className="procedure-comment">{event.data?.comment}</p>
+        <div className="procedure-comment-wrapper">
+          {" "}
+          <p className="procedure-title">{event.data?.procedure}</p>
+          <p className="procedure-comment">{event.data?.comment}</p>
+        </div>
       </div>
     );
   };
@@ -167,8 +170,8 @@ export function Home() {
           resourceTitleAccessor="title"
           startAccessor="start"
           endAccessor="end"
-          style={{ height: 600 }}
-          view={view} 
+          style={{ height: 1200 }}
+          view={view}
           views={
             selectedDoctorID
               ? { day: true, work_week: true, month: true }
@@ -182,12 +185,12 @@ export function Home() {
           now={now}
           selectable
           onSelectSlot={handleOpenAddModal}
-          scrollToTime={now}
+          //   scrollToTime={now}
           formats={formats}
           components={{
             event: EventComponent,
           }}
-          onView={handleViewChange} 
+          onView={handleViewChange}
         />
         {isAddFormModalOpen && (
           <AddFormModal
