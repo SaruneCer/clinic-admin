@@ -6,10 +6,9 @@ import { AddFormModal } from "../components/AddFormModal";
 import { AlertModal } from "../components/AlertModal";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "../styles/customCalendar.css";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-
 
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 
@@ -26,6 +25,7 @@ export function Home() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [view, setView] = useState(Views.DAY);
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     if (!schedules) return;
@@ -68,6 +68,16 @@ export function Home() {
   };
 
   const handleOpenAddModal = (slotInfo) => {
+    const day = slotInfo.start.getDay();
+
+    if (day === 0 || day === 6) {
+      setAlertMessage(
+        "You cannot create events on Saturdays or Sundays. Please choose a work day."
+      );
+      setIsAlertModalOpen(true);
+      return;
+    }
+
     const isOverlapping = events.some((event) => {
       return (
         event.resourceId === slotInfo.resourceId &&
@@ -81,6 +91,9 @@ export function Home() {
       setSelectedSlot(slotInfo);
       setIsAddFormModalOpen(true);
     } else {
+      setAlertMessage(
+        "Your selected time overlaps with an existing appointment. Please choose another time."
+      );
       setIsAlertModalOpen(true);
     }
   };
@@ -173,9 +186,10 @@ export function Home() {
     if (!event || !event.title) return null;
     return (
       <div>
-        <div className="header-wrapper">
+            <div className="header-wrapper">
+            <span className="custom-event-label">{event.start ? moment(event.start).format("HH:mm") : ""} - {event.end ? moment(event.end).format("HH:mm") : ""}</span>
           <h3 className="patient-name">{event.title}</h3>
-          <i className="fas fa-file-medical" alt="Write medical report"></i>
+          {/* <i className="fas fa-file-medical" alt="Write medical report"></i> */}
         </div>
 
         <div className="procedure-comment-wrapper">
@@ -265,7 +279,7 @@ export function Home() {
         {isAlertModalOpen && (
           <AlertModal
             isOpen={isAlertModalOpen}
-            message={`Your selected time overlaps with an existing appointment, please choose another time.`}
+            message={alertMessage}
             onClose={handleCloseAlertModal}
             buttons={[
               {
@@ -280,4 +294,3 @@ export function Home() {
     </main>
   );
 }
-

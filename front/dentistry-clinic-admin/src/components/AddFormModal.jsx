@@ -66,7 +66,6 @@ export function AddFormModal({
   const [errors, setErrors] = useState({});
   const { postData, isLoading } = usePostData(resource);
 
-  // Update formData with slotInfo when the modal is opened
   useEffect(() => {
     if (resource === 'schedules' && slotInfo) {
       setFormData((prevData) => ({
@@ -151,6 +150,30 @@ export function AddFormModal({
     try {
       let structuredData = { ...formData };
 
+      if (resource === "doctors" || resource === "patients") {
+        structuredData.contactInfo = {
+          phone: structuredData.phone,
+          email:structuredData.email,
+        };
+        delete structuredData.phone;
+        delete structuredData.email;
+      }
+      if (resource === "patients") {
+        structuredData.medicalHistory = [
+          {
+            conditions: structuredData.conditions,
+            notes: structuredData.notes,
+          },
+        ];
+        delete structuredData.conditions;
+        delete structuredData.notes;
+      }
+  
+      if (resource === "procedures" && formData.category === "addNewCategory") {
+        structuredData.category = formData.newCategory;
+        delete structuredData.newCategory;
+      }
+
       if (resource === "schedules") {
         if (slotInfo?.resourceId) {
           structuredData.doctorID = slotInfo.resourceId;
@@ -172,7 +195,6 @@ export function AddFormModal({
         delete structuredData.patientName;
       }
 
-      console.log(structuredData);
       await postData(structuredData);
       rerender();
       onClose();
