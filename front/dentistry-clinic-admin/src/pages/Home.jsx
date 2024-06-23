@@ -13,13 +13,13 @@ import "../styles/customCalendar.css";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 
 const DragAndDropCalendar = withDragAndDrop(Calendar);
-
 const localizer = momentLocalizer(moment);
 
 export function Home() {
   const { data: schedules, loading, rerender } = useGetData("schedules");
   const { data: doctors } = useGetData("doctors");
-  const { data: procedures } = useGetData("procedures");
+  const { data: procedures, loading: proceduresLoading } =
+    useGetData("procedures");
   const { editData } = useEditData();
   const { deleteData } = useDeleteData();
 
@@ -31,32 +31,27 @@ export function Home() {
   const [view, setView] = useState(Views.DAY);
   const [alertMessage, setAlertMessage] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isSceduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
 
   useEffect(() => {
     if (!schedules) return;
 
-    const filteredEvents = schedules
-      .filter(
-        (schedule) =>
-          !selectedDoctorID || schedule.doctorID === selectedDoctorID
-      )
-      .map((schedule) => ({
-        id: schedule._id,
-        title: schedule.title || "Untitled",
-        start: new Date(schedule.start),
-        end: new Date(schedule.end),
-        allDay: false,
-        data: {
-          procedure: schedule.data.procedure,
-          comment: schedule.data.comment,
-        },
-        resourceId: selectedDoctorID ? selectedDoctorID : schedule.doctorID,
-        tooltip: `Procedure: ${schedule.data.procedure}, Comment: ${schedule.data.comment}`,
-      }));
+    const filteredEvents = schedules.map((schedule) => ({
+      id: schedule._id,
+      title: schedule.title || "Untitled",
+      start: new Date(schedule.start),
+      end: new Date(schedule.end),
+      allDay: false,
+      data: {
+        procedure: schedule.data.procedure,
+        comment: schedule.data.comment,
+      },
+      resourceId: schedule.doctorID, // Use the doctor's ID here
+      tooltip: `Procedure: ${schedule.data.procedure}, Comment: ${schedule.data.comment}`,
+    }));
 
     setEvents(filteredEvents);
-  }, [schedules, selectedDoctorID]);
+  }, [schedules]);
 
   const handleDoctorChange = (event) => {
     const doctorID = event.target.value;
@@ -112,22 +107,23 @@ export function Home() {
     setIsAlertModalOpen(false);
   };
 
-  const handleMoveEvent = async ({ event, start, end }) => {
+  const handleMoveEvent = async ({ event, start, end, resourceId }) => {
     const updatedEvents = events.map((existingEvent) =>
       existingEvent.id === event.id
-        ? { ...existingEvent, start, end }
+        ? { ...existingEvent, start, end, resourceId }
         : existingEvent
     );
     setEvents(updatedEvents);
+
     try {
       const updatedEvent = {
         ...event,
         start: start.toISOString(),
         end: end.toISOString(),
+        doctorID: resourceId,
       };
 
       await editData("schedules", event.id, updatedEvent, "info");
-      // rerender();
     } catch (error) {
       console.error("Error updating event:", error);
     }
@@ -181,6 +177,10 @@ export function Home() {
     setScheduleModalOpen(false);
   };
 
+  if (proceduresLoading || !procedures) {
+    return <p>Loading procedures...</p>;
+  }
+
   if (loading || !doctors) {
     return <p>Loading...</p>;
   }
@@ -214,39 +214,31 @@ export function Home() {
       )} - ${localizer.format(end, "dddd (MMMM D)", culture)}`,
   };
 
-  const extractCategories = async () => {
-    try {
-      await procedures;
-      const categoriesSet = new Set();
-      procedures.forEach((procedure) => {
-        if (procedure.category) {
-          categoriesSet.add(procedure.category);
-        }
-      });
-      return Array.from(categoriesSet);
-    } catch (error) {
-      console.error("Error fetching procedures:", error);
-      return [];
-    }
+  const extractCategories = () => {
+    const categoriesSet = new Set();
+    procedures.forEach((procedure) => {
+      if (procedure.category) {
+        categoriesSet.add(procedure.category);
+      }
+    });
+    return Array.from(categoriesSet);
   };
 
-  const categoryList = extractCategories(procedures);
+  const categories = extractCategories();
 
   const EventComponent = ({ event }) => {
     if (!event || !event.title) return null;
     return (
       <div>
-        <div className="header-wrapper">
+        <div className="event-header-wrapper">
           <span className="custom-event-label">
             {event.start ? moment(event.start).format("HH:mm") : ""} -{" "}
             {event.end ? moment(event.end).format("HH:mm") : ""}
           </span>
           <h3 className="patient-name">{event.title}</h3>
-          {/* <i className="fas fa-file-medical" alt="Write medical report"></i> */}
         </div>
 
         <div className="procedure-comment-wrapper">
-          {" "}
           <p className="procedure-title">{event.data?.procedure}</p>
           <p className="procedure-comment">{event.data?.comment}</p>
         </div>
@@ -313,7 +305,6 @@ export function Home() {
           selectable
           onSelectSlot={handleOpenAddModal}
           tooltipAccessor="tooltip"
-          //   scrollToTime={now}
           formats={formats}
           components={{
             event: EventComponent,
@@ -328,7 +319,7 @@ export function Home() {
             rerender={rerender}
             slotInfo={selectedSlot}
             procedures={procedures}
-            existingCategories={categoryList}
+            existingCategories={categories}
           />
         )}
         {isAlertModalOpen && (
@@ -345,7 +336,7 @@ export function Home() {
             ]}
           />
         )}
-        {isSceduleModalOpen && (
+        {isScheduleModalOpen && (
           <ScheduleModal
             event={selectedEvent}
             onClose={handleCloseScheduleModal}

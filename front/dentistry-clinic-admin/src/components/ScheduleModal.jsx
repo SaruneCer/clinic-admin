@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { AlertModal } from "./AlertModal";
+import { AddFormModal } from "./AddFormModal";
+import { useGetData } from "../customHooks/useGetData";
 // import "../styles/schedule-modal.css";
 
 export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
@@ -15,6 +17,12 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   const [errors, setErrors] = useState({});
   const [isAlertModalOpen, setAlertModalOpen] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] = useState(null);
+  const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
+  const [isAddingAppointment, setIsAddingAppointment] = useState(false);
+  const [isAddingPatient, setIsAddingPatient] = useState(false);
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [patientAdded, setPatientAdded] = useState(false);
+  const { data: patients, loading, rerender } = useGetData("patients");
 
   useEffect(() => {
     if (event) {
@@ -86,12 +94,56 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
 
   const handleDeleteClick = () => {
     setScheduleToDelete(event.id);
+    setAlertMessage("Do you want to delete this appointment?");
     setAlertModalOpen(true);
   };
 
   const handleCloseAlertModal = () => {
     setAlertModalOpen(false);
     setScheduleToDelete(null);
+  };
+
+  const handleAddPatientClick = () => {
+    setIsAddingPatient(true);
+    setIsAddFormModalOpen(true);
+  };
+
+  const handleAppointmentReportClick = () => {
+    console.log(patients);
+    const eventPatientName = event.title;
+    console.log(eventPatientName);
+
+    const isPatientExists = patients.some((patient) => {
+      if (loading) {
+        return (
+          <>
+            <p>Loading...</p>
+          </>
+        );
+      }
+
+      const patientName = `${patient.name} ${patient.lastname}`;
+      return patientName === eventPatientName;
+    });
+
+    if (isPatientExists) {
+      setIsAddingAppointment(true);
+      setIsAddFormModalOpen(true);
+    } else {
+      setAlertMessage(
+        "Patient does not exist in database. Please add patient first."
+      );
+      setAlertModalOpen(true);
+    }
+  };
+
+  const handleAddFormCloseModal = () => {
+    setIsAddFormModalOpen(false);
+    setIsAddingAppointment(false);
+    if (isAddingPatient) {
+      setPatientAdded(true);
+      setIsAddingPatient(false);
+    }
   };
 
   const renderDoctorSelect = () => {
@@ -151,19 +203,31 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
           &times;
         </span>
         <h2>Appointment Info</h2>
+        <Button
+          buttonText="APPOINTMENT REPORT"
+          onClick={handleAppointmentReportClick}
+        />
+        <Button
+          buttonText={patientAdded ? "PATIENT ADDED ✔︎" : "ADD PATIENT"}
+          onClick={handleAddPatientClick}
+          disabled={patientAdded}
+        />
         <form className="edit-form">
           {renderFormFields()}
           <div className="modal-buttons">
             <Button buttonText="SAVE" onClick={handleSave} />
             <Button buttonText="CANCEL" onClick={onClose} />
-            <Button buttonText="DELETE APPOINTMENT" onClick={handleDeleteClick} />
+            <Button
+              buttonText="DELETE APPOINTMENT"
+              onClick={handleDeleteClick}
+            />
           </div>
         </form>
       </div>
       {isAlertModalOpen && scheduleToDelete && (
         <AlertModal
           isOpen={isAlertModalOpen}
-          message={`Do you want to delete this appointment?`}
+          message={alertMessage}
           onClose={handleCloseAlertModal}
           buttons={[
             {
@@ -180,6 +244,39 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
               onClick: handleCloseAlertModal,
             },
           ]}
+        />
+      )}
+      {isAlertModalOpen &&
+        alertMessage ===
+          "Patient does not exist in database. Please add patient first." && (
+          <AlertModal
+            isOpen={isAlertModalOpen}
+            message={alertMessage}
+            onClose={handleCloseAlertModal}
+            buttons={[
+              {
+                label: "Close",
+                className: "cancel-button",
+                onClick: handleCloseAlertModal,
+              },
+            ]}
+          />
+        )}
+      {isAddFormModalOpen && isAddingAppointment && (
+        <AddFormModal
+          resource="appointments"
+          onClose={handleAddFormCloseModal}
+          existingCategories={[]}
+                  rerender={rerender}
+                  slotInfo={{ doctorID: formData.doctorID, patientName: formData.patientName }}
+        />
+      )}
+      {isAddFormModalOpen && isAddingPatient && (
+        <AddFormModal
+          resource="patients"
+          onClose={handleAddFormCloseModal}
+          existingCategories={[]}
+          rerender={rerender}
         />
       )}
     </div>

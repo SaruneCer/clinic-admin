@@ -480,7 +480,6 @@ app.post("/dentistry_clinic_admin/appointments/", async (req, res) => {
     const collection = db.collection("appointments");
     const newAppointment = req.body;
 
-    // Validation
 
     const result = await collection.insertOne(newAppointment);
     res.json({

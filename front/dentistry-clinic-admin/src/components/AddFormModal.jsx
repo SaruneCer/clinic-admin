@@ -39,13 +39,29 @@ export function AddFormModal({
       { name: "category", type: "select", placeholder: "Category" },
     ],
     appointments: [
-      { name: "doctorName", type: "text", placeholder: "Doctor's name" },
-      { name: "patientName", type: "text", placeholder: "Patient's name" },
+      // { name: "doctorName", type: "text", placeholder: "Doctor's name" },
+      { name: "patientName", type: "text", placeholder: "Patient's Name" },
+      {
+        name: "patientLastname",
+        type: "text",
+        placeholder: "Patient's Lastname",
+      },
       { name: "procedureName", type: "text", placeholder: "Procedure name" },
-      { name: "report", type: "text", placeholder: "Report" },
+      {
+        name: "report",
+        type: "textarea",
+        placeholder:
+          "Appointment details, prescribed medications and next scheduled appointments.",
+      },
     ],
     schedules: [
-      { name: "patientName", type: "text", placeholder: "Patient's name" },
+      { name: "patientName", type: "text", placeholder: "Patient's Name" },
+      {
+        name: "patientLastname",
+        type: "text",
+        placeholder: "Patient's Lastname",
+      },
+      { name: "category", type: "select", placeholder: "Category" },
       { name: "procedureName", type: "select", placeholder: "Procedure name" },
       { name: "comment", type: "text", placeholder: "Comment" },
       {
@@ -94,7 +110,7 @@ export function AddFormModal({
     }
   }, [slotInfo, resource]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (selectedCategory) {
       setFilteredProcedures(
         procedures.filter(
@@ -170,7 +186,6 @@ export function AddFormModal({
     return Object.keys(newErrors).length === 0;
   };
 
-
   const handleCategoryChange = (e) => {
     const { value } = e.target;
     setSelectedCategory(value);
@@ -184,7 +199,6 @@ export function AddFormModal({
       setErrors({ ...errors, [name]: "" });
     }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -230,7 +244,7 @@ export function AddFormModal({
           structuredData.end = formatDateAndTime(new Date(formData.end));
         }
 
-        structuredData.title = formData.patientName;
+        structuredData.title = `${formData.patientName} ${formData.patientLastname}`;
         structuredData.data = {
           procedure: formData.procedureName,
           comment: formData.comment,
@@ -241,8 +255,14 @@ export function AddFormModal({
         delete structuredData.patientName;
       }
 
+      if (resource === "appointments") {
+        structuredData.doctorID = slotInfo.doctorID;
+      }
+
       await postData(structuredData);
-      rerender();
+      if (rerender) {
+        rerender();
+      }
       onClose();
     } catch (error) {
       console.error("Error submitting data:", error);
@@ -257,7 +277,6 @@ export function AddFormModal({
     }
   };
 
-  
   return (
     <div id="add-modal">
       <div className="form-container">
@@ -265,13 +284,13 @@ export function AddFormModal({
           &times;
         </span>
         <form>
-          {resource === "schedules" && (
-            <>
-              <div className="input-wrapper">
+          {fields.map((field) => (
+            <div className="input-wrapper" key={field.name}>
+              {resource === "procedures" && field.type === "select" && (
                 <select
-                  name="category"
-                  value={selectedCategory}
-                  onChange={handleCategoryChange}
+                  name={field.name}
+                  value={formData[field.name] || ""}
+                  onChange={handleChange}
                 >
                   <option value="">Select Category</option>
                   {existingCategories.map((category) => (
@@ -279,48 +298,81 @@ export function AddFormModal({
                       {category}
                     </option>
                   ))}
+                  <option value="addNewCategory">Add New Category</option>
                 </select>
-                {errors.category && (
-                  <span className="error-message">{errors.category}</span>
-                )}
-              </div>
+              )}
 
-              <div className="input-wrapper">
-                <select
-                  name="procedureName"
-                  value={formData.procedureName || ""}
-                  onChange={handleProcedureChange}
-                >
-                  <option value="">Select Procedure</option>
-                  {filteredProcedures.map((procedure) => (
-                    <option key={procedure.id} value={procedure.name}>
-                      {procedure.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.procedureName && (
-                  <span className="error-message">{errors.procedureName}</span>
-                )}
-              </div>
-            </>
-          )}
-          
-          {fields.map((field) =>
-            field.name !== "category" && field.name !== "procedureName" ? (
-              <div className="input-wrapper" key={field.name}>
-                <input
-                  type={field.type}
+              {resource === "appointments" && field.name === "report" && (
+                <textarea
                   name={field.name}
                   placeholder={field.placeholder}
                   value={formData[field.name] || ""}
                   onChange={handleChange}
                 />
-                {errors[field.name] && (
-                  <span className="error-message">{errors[field.name]}</span>
+              )}
+
+              {resource === "schedules" && field.type === "select" && (
+                <>
+                  {field.name === "category" && (
+                    <select
+                      name="category"
+                      value={formData.category || ""}
+                      onChange={handleCategoryChange}
+                    >
+                      <option value="">Select Category</option>
+                      {existingCategories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {resource === "appointments" && field.type === "textarea" && (
+                    <textarea
+                      name="report"
+                      placeholder="Appointment details, prescribed medications and next scheduled appointments."
+                      value={formData.report || ""}
+                      onChange={handleChange}
+                    />
+                  )}
+
+                  {field.name === "procedureName" && (
+                    <select
+                      name="procedureName"
+                      value={formData.procedureName || ""}
+                      onChange={handleProcedureChange}
+                    >
+                      <option value="">Select Procedure</option>
+                      {filteredProcedures.map((procedure) => (
+                        <option key={procedure.id} value={procedure.name}>
+                          {procedure.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </>
+              )}
+              {!(resource === "appointments" && field.name === "report") &&
+                !(
+                  resource === "schedules" &&
+                  field.name === "procedure" &&
+                  field.name === "category"
+                ) && (
+                  <input
+                    type={field.type}
+                    name={field.name}
+                    placeholder={field.placeholder}
+                    value={formData[field.name] || ""}
+                    onChange={handleChange}
+                  />
                 )}
-              </div>
-            ) : null
-          )}
+
+              {errors[field.name] && (
+                <p className="error-message">{errors[field.name]}</p>
+              )}
+            </div>
+          ))}
 
           <Button
             buttonText="Add"
