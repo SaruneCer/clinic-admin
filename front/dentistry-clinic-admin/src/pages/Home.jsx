@@ -18,6 +18,7 @@ const localizer = momentLocalizer(moment);
 export function Home() {
   const { data: schedules, loading, rerender } = useGetData("schedules");
   const { data: doctors } = useGetData("doctors");
+  const { data: procedures } = useGetData("procedures");
   const { editData } = useEditData();
 
   const [selectedDoctorID, setSelectedDoctorID] = useState("");
@@ -208,6 +209,18 @@ export function Home() {
       )} - ${localizer.format(end, "dddd (MMMM D)", culture)}`,
   };
 
+  const extractCategories = (proceduresList) => {
+    const categoriesSet = new Set();
+    proceduresList.forEach((procedure) => {
+      if (procedure.category) {
+        categoriesSet.add(procedure.category);
+      }
+    });
+    return Array.from(categoriesSet);
+  };
+
+  const categoryList = extractCategories(procedures);
+
   const EventComponent = ({ event }) => {
     if (!event || !event.title) return null;
     return (
@@ -302,8 +315,9 @@ export function Home() {
             resource="schedules"
             onClose={handleCloseAddModal}
             rerender={rerender}
-            existingCategories={[]}
             slotInfo={selectedSlot}
+            procedures={procedures}
+            existingCategories={categoryList}
           />
         )}
         {isAlertModalOpen && (
@@ -326,6 +340,7 @@ export function Home() {
             onClose={handleCloseScheduleModal}
             onDelete={deleteSchedule}
             onSave={handleSaveEditedSchedule}
+            doctors={doctors}
           />
         )}
       </div>
