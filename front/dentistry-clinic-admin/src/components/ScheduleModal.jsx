@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "./Button";
 // import "../styles/schedule-modal.css";
 
-export function ScheduleModal({ event, onSave, onClose, onDelete }) {
-  console.log(event);
+export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   const toDateTimeLocalString = (date) => {
     const pad = (num) => String(num).padStart(2, "0");
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
@@ -69,7 +68,6 @@ export function ScheduleModal({ event, onSave, onClose, onDelete }) {
         comment: formData.comment,
       },
     };
-    console.log(structuredData);
 
     onSave(structuredData);
     onClose();
@@ -83,10 +81,35 @@ export function ScheduleModal({ event, onSave, onClose, onDelete }) {
     }
   };
 
-  const renderFormFields = (formData) => {
+  const renderDoctorSelect = () => {
+    return (
+      <div className="edit-form-input">
+        <label htmlFor="doctorID">Doctor:</label>
+        <select
+          id="doctorID"
+          name="doctorID"
+          value={formData.doctorID}
+          onChange={handleChange}
+        >
+          {doctors.map((doctor) => (
+            <option key={doctor._id} value={doctor._id}>
+              {doctor.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
+  const renderFormFields = () => {
     return Object.keys(formData).map((key) => {
       if (key === "eventID") return null;
+
       const value = formData[key];
+      if (key === "doctorID") {
+        return renderDoctorSelect();
+      }
+
       return (
         <div className="edit-form-input" key={key}>
           <label htmlFor={key}>
@@ -116,7 +139,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete }) {
         </span>
         <h2>Appointment Info</h2>
         <form className="edit-form">
-          {renderFormFields(formData)}
+          {renderFormFields()}
           <div className="modal-buttons">
             <Button buttonText="SAVE" onClick={handleSave} />
             <Button buttonText="CANCEL" onClick={onClose} />
