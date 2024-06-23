@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
+import { AlertModal } from "./AlertModal";
 // import "../styles/schedule-modal.css";
 
 export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
@@ -12,6 +13,8 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
 
   const [formData, setFormData] = useState(event);
   const [errors, setErrors] = useState({});
+  const [isAlertModalOpen, setAlertModalOpen] = useState(false);
+  const [scheduleToDelete, setScheduleToDelete] = useState(null);
 
   useEffect(() => {
     if (event) {
@@ -81,6 +84,16 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
     }
   };
 
+  const handleDeleteClick = () => {
+    setScheduleToDelete(event.id);
+    setAlertModalOpen(true);
+  };
+
+  const handleCloseAlertModal = () => {
+    setAlertModalOpen(false);
+    setScheduleToDelete(null);
+  };
+
   const renderDoctorSelect = () => {
     return (
       <div className="edit-form-input">
@@ -143,10 +156,32 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
           <div className="modal-buttons">
             <Button buttonText="SAVE" onClick={handleSave} />
             <Button buttonText="CANCEL" onClick={onClose} />
-            <Button buttonText="DELETE APPOINTMENT" onClick={onDelete} />
+            <Button buttonText="DELETE APPOINTMENT" onClick={handleDeleteClick} />
           </div>
         </form>
       </div>
+      {isAlertModalOpen && scheduleToDelete && (
+        <AlertModal
+          isOpen={isAlertModalOpen}
+          message={`Do you want to delete this appointment?`}
+          onClose={handleCloseAlertModal}
+          buttons={[
+            {
+              label: "Yes",
+              className: "confirm-button",
+              onClick: () => {
+                onDelete(scheduleToDelete);
+                handleCloseAlertModal();
+              },
+            },
+            {
+              label: "Cancel",
+              className: "cancel-button",
+              onClick: handleCloseAlertModal,
+            },
+          ]}
+        />
+      )}
     </div>
   );
 }

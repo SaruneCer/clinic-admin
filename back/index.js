@@ -389,8 +389,6 @@ app.post("/dentistry_clinic_admin/procedures/", async (req, res) => {
     const collection = db.collection("procedures");
     const newProcedure = req.body;
 
-    // Validation
-
     const result = await collection.insertOne(newProcedure);
     res.json({
       message: "Procedure added successfully",
@@ -564,6 +562,24 @@ app.post("/dentistry_clinic_admin/schedules/", async (req, res) => {
     });
   } catch (e) {
     console.error("Error adding new schedule:", e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.delete("/dentistry_clinic_admin/schedules/:id", async (req, res) => {
+  try {
+    await connect();
+    const objectId = new ObjectId(req.params.id);
+    const collection = db.collection("schedules");
+    const result = await collection.deleteOne({ _id: objectId });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Schedule not found" });
+    }
+
+    res.json({ message: "Schedule deleted successfully" });
+  } catch (e) {
+    console.error("Error deleting schedule:", e);
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useGetData } from "../customHooks/useGetData";
 import { useEditData } from "../customHooks/useEditData";
+import { useDeleteData } from "../customHooks/useDeleteData";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import { AddFormModal } from "../components/AddFormModal";
 import { AlertModal } from "../components/AlertModal";
@@ -20,6 +21,7 @@ export function Home() {
   const { data: doctors } = useGetData("doctors");
   const { data: procedures } = useGetData("procedures");
   const { editData } = useEditData();
+  const { deleteData } = useDeleteData();
 
   const [selectedDoctorID, setSelectedDoctorID] = useState("");
   const [events, setEvents] = useState([]);
@@ -174,7 +176,10 @@ export function Home() {
     }
   };
 
-  const deleteSchedule = () => {};
+  const handleDelete = async (scheduleToDelete) => {
+    await deleteData("schedules", scheduleToDelete, () => rerender());
+    setScheduleModalOpen(false);
+  };
 
   if (loading || !doctors) {
     return <p>Loading...</p>;
@@ -209,14 +214,20 @@ export function Home() {
       )} - ${localizer.format(end, "dddd (MMMM D)", culture)}`,
   };
 
-  const extractCategories = (proceduresList) => {
-    const categoriesSet = new Set();
-    proceduresList.forEach((procedure) => {
-      if (procedure.category) {
-        categoriesSet.add(procedure.category);
-      }
-    });
-    return Array.from(categoriesSet);
+  const extractCategories = async () => {
+    try {
+      await procedures;
+      const categoriesSet = new Set();
+      procedures.forEach((procedure) => {
+        if (procedure.category) {
+          categoriesSet.add(procedure.category);
+        }
+      });
+      return Array.from(categoriesSet);
+    } catch (error) {
+      console.error("Error fetching procedures:", error);
+      return [];
+    }
   };
 
   const categoryList = extractCategories(procedures);
@@ -338,7 +349,7 @@ export function Home() {
           <ScheduleModal
             event={selectedEvent}
             onClose={handleCloseScheduleModal}
-            onDelete={deleteSchedule}
+            onDelete={handleDelete}
             onSave={handleSaveEditedSchedule}
             doctors={doctors}
           />
