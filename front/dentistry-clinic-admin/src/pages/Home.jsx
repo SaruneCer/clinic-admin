@@ -1,17 +1,24 @@
 import { useState, useEffect } from "react";
 import { useGetData } from "../customHooks/useGetData";
+import { useEditData } from "../customHooks/useEditData";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import { AddFormModal } from "../components/AddFormModal";
 import { AlertModal } from "../components/AlertModal";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import "../styles/customCalendar.css";
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+
+
+const DragAndDropCalendar = withDragAndDrop(Calendar);
 
 const localizer = momentLocalizer(moment);
 
 export function Home() {
   const { data: schedules, loading, rerender } = useGetData("schedules");
   const { data: doctors } = useGetData("doctors");
+  const { editData } = useEditData();
 
   const [selectedDoctorID, setSelectedDoctorID] = useState("");
   const [events, setEvents] = useState([]);
@@ -29,6 +36,7 @@ export function Home() {
           !selectedDoctorID || schedule.doctorID === selectedDoctorID
       )
       .map((schedule) => ({
+        id: schedule._id,
         title: schedule.title || "Untitled",
         start: new Date(schedule.start),
         end: new Date(schedule.end),
@@ -38,6 +46,7 @@ export function Home() {
           comment: schedule.data.comment,
         },
         resourceId: selectedDoctorID ? selectedDoctorID : schedule.doctorID,
+        tooltip: `Procedure: ${schedule.data.procedure}, Comment: ${schedule.data.comment}`,
       }));
 
     setEvents(filteredEvents);
@@ -84,6 +93,49 @@ export function Home() {
     setIsAlertModalOpen(false);
   };
 
+  const handleMoveEvent = async ({ event, start, end }) => {
+    const updatedEvents = events.map((existingEvent) =>
+      existingEvent.id === event.id
+        ? { ...existingEvent, start, end }
+        : existingEvent
+    );
+    setEvents(updatedEvents);
+    try {
+      const updatedEvent = {
+        ...event,
+        start: start.toISOString(),
+        end: end.toISOString(),
+      };
+
+      await editData("schedules", event.id, updatedEvent, "info");
+      // rerender();
+    } catch (error) {
+      console.error("Error updating event:", error);
+    }
+  };
+
+  const handleResizeEvent = async ({ event, start, end }) => {
+    const updatedEvents = events.map((existingEvent) =>
+      existingEvent.id === event.id
+        ? { ...existingEvent, start, end }
+        : existingEvent
+    );
+    setEvents(updatedEvents);
+
+    try {
+      const updatedEvent = {
+        ...event,
+        start: start.toISOString(),
+        end: end.toISOString(),
+      };
+
+      await editData("schedules", event.id, updatedEvent, "info");
+      // rerender();
+    } catch (error) {
+      console.error("Error updating event:", error);
+    }
+  };
+
   if (loading || !doctors) {
     return <p>Loading...</p>;
   }
@@ -121,7 +173,11 @@ export function Home() {
     if (!event || !event.title) return null;
     return (
       <div>
-        <h3 className="patient-name">{event.title}</h3>
+        <div className="header-wrapper">
+          <h3 className="patient-name">{event.title}</h3>
+          <i className="fas fa-file-medical" alt="Write medical report"></i>
+        </div>
+
         <div className="procedure-comment-wrapper">
           {" "}
           <p className="procedure-title">{event.data?.procedure}</p>
@@ -162,7 +218,7 @@ export function Home() {
           </select>
         </div>
 
-        <Calendar
+        <DragAndDropCalendar
           localizer={localizer}
           events={events}
           resources={resources}
@@ -183,8 +239,13 @@ export function Home() {
           max={new Date(new Date().setHours(17, 0, 0))}
           showCurrentTimeIndicator={true}
           now={now}
+          onEventDrop={handleMoveEvent}
+          onEventResize={handleResizeEvent}
+          popup
+          resizable
           selectable
           onSelectSlot={handleOpenAddModal}
+          tooltipAccessor="tooltip"
           //   scrollToTime={now}
           formats={formats}
           components={{
@@ -219,3 +280,4 @@ export function Home() {
     </main>
   );
 }
+

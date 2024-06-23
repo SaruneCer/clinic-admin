@@ -538,13 +538,18 @@ app.get("/dentistry_clinic_admin/schedules", async (req, res) => {
   try {
     await connect();
     const collection = db.collection("schedules");
-    const results = await collection.find({}).toArray();
+    
+    const { doctorID } = req.query;
+    const filter = doctorID ? { doctorID } : {};
+
+    const results = await collection.find(filter).toArray();
     res.json(results);
   } catch (e) {
     console.error("Error fetching schedules:", e);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 app.post("/dentistry_clinic_admin/schedules/", async (req, res) => {
   try {
