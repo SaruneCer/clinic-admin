@@ -4,6 +4,7 @@ import { useEditData } from "../customHooks/useEditData";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import { AddFormModal } from "../components/AddFormModal";
 import { AlertModal } from "../components/AlertModal";
+import { ScheduleModal } from "../components/ScheduleModal";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
@@ -26,6 +27,8 @@ export function Home() {
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [view, setView] = useState(Views.DAY);
   const [alertMessage, setAlertMessage] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [isSceduleModalOpen, setScheduleModalOpen] = useState(false);
 
   useEffect(() => {
     if (!schedules) return;
@@ -149,6 +152,29 @@ export function Home() {
     }
   };
 
+  const handleDoubleClickEvent = (selectedEvent) => {
+    setSelectedEvent(selectedEvent);
+    setScheduleModalOpen(true);
+  };
+
+  const handleCloseScheduleModal = () => {
+    setSelectedEvent(null);
+    setScheduleModalOpen(false);
+  };
+
+  const handleSaveEditedSchedule = async (editedInfo) => {
+    try {
+      await editData("schedules", editedInfo.id, editedInfo, "info");
+      setScheduleModalOpen(false);
+      setSelectedEvent(null);
+      rerender();
+    } catch (error) {
+      console.error("Error editing procedure:", error);
+    }
+  };
+
+  const deleteSchedule = () => {};
+
   if (loading || !doctors) {
     return <p>Loading...</p>;
   }
@@ -186,8 +212,11 @@ export function Home() {
     if (!event || !event.title) return null;
     return (
       <div>
-            <div className="header-wrapper">
-            <span className="custom-event-label">{event.start ? moment(event.start).format("HH:mm") : ""} - {event.end ? moment(event.end).format("HH:mm") : ""}</span>
+        <div className="header-wrapper">
+          <span className="custom-event-label">
+            {event.start ? moment(event.start).format("HH:mm") : ""} -{" "}
+            {event.end ? moment(event.end).format("HH:mm") : ""}
+          </span>
           <h3 className="patient-name">{event.title}</h3>
           {/* <i className="fas fa-file-medical" alt="Write medical report"></i> */}
         </div>
@@ -266,6 +295,7 @@ export function Home() {
             event: EventComponent,
           }}
           onView={handleViewChange}
+          onDoubleClickEvent={handleDoubleClickEvent}
         />
         {isAddFormModalOpen && (
           <AddFormModal
@@ -288,6 +318,14 @@ export function Home() {
                 onClick: handleCloseAlertModal,
               },
             ]}
+          />
+        )}
+        {isSceduleModalOpen && (
+          <ScheduleModal
+            event={selectedEvent}
+            onClose={handleCloseScheduleModal}
+            onDelete={deleteSchedule}
+            onSave={handleSaveEditedSchedule}
           />
         )}
       </div>
