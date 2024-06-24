@@ -439,31 +439,51 @@ app.patch("/dentistry_clinic_admin/procedures/:id/info", async (req, res) => {
 
 // appointments collection
 
-app.get("/dentistry_clinic_admin/appointments", async (req, res) => {
+app.get("/dentistry_clinic_admin/appointments/:patientID", async (req, res) => {
+  const patientID = req.params.patientID;
+
   try {
     await connect();
     const collection = db.collection("appointments");
+
     const pipeline = [
       {
-        $lookup: {
-          from: "procedures",
-          localField: "procedureName",
-          foreignField: "name",
-          as: "procedure",
-        },
+        $match: {
+          patientID: patientID  
+        }
       },
       {
-        $unwind: "$procedure",
+        $lookup: {
+          from: "doctors",
+          let: { doctorID: { $toObjectId: "$doctorID" } }, 
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: [ "$_id", "$$doctorID" ] } 
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                name: 1 
+              }
+            }
+          ],
+          as: "doctor"
+        }
+      },
+      {
+        $unwind: "$doctor"
       },
       {
         $project: {
-          doctorName: 1,
-          patientName: 1,
+          _id: 1,
+          doctorName: "$doctor.name",
           procedureName: 1,
-          price: "$procedure.price",
-          report: 1,
-        },
-      },
+          appointmentDate: 1,
+          report: 1
+        }
+      }
     ];
 
     const results = await collection.aggregate(pipeline).toArray();
@@ -473,6 +493,8 @@ app.get("/dentistry_clinic_admin/appointments", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+
+
 
 app.post("/dentistry_clinic_admin/appointments/", async (req, res) => {
   try {

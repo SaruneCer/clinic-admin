@@ -8,6 +8,7 @@ export function useGetData(resource) {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+
     try {
       const response = await fetch(`${BASE_URL}${resource}`);
       if (!response.ok) {
@@ -25,10 +26,7 @@ export function useGetData(resource) {
             return item.name && item.duration && item.price;
           } else if (resource === "appointments") {
             return (
-              item.doctorName &&
-              item.patientName &&
-              item.procedureName &&
-              item.report
+              item._id && item.doctorName && item.appointmentDate && item.report
             );
           } else if (resource === "schedules") {
             return (
