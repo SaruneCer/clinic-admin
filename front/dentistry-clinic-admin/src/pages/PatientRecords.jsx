@@ -8,6 +8,8 @@ import { EditInfoModal } from "../components/EditInfoModal";
 import { useDeleteData } from "../customHooks/useDeleteData";
 import { AlertModal } from "../components/AlertModal";
 import { useNavigate } from "react-router-dom";
+import { AppointmentBox } from "../components/AppointmentBox";
+
 
 export function PatientRecords() {
   const { patientID } = useParams();
@@ -17,6 +19,9 @@ export function PatientRecords() {
     loading: patientLoading,
     rerender,
   } = useGetData(`patients/${patientID}`);
+  const { data: appointments, loading: appointmentsLoading } = useGetData(
+    `appointments/${patientID}`
+  );
   const [patientToEdit, setPatientToEdit] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { editData } = useEditData("patients");
@@ -27,6 +32,7 @@ export function PatientRecords() {
   const { deleteData } = useDeleteData();
   const navigate = useNavigate();
   const [conditionToDelete, setConditionToDelete] = useState(null);
+
 
   const handleEditPersonalInfoClick = () => {
     setIsEditModalOpen(true);
@@ -84,13 +90,13 @@ export function PatientRecords() {
     setIsModalOpen(true);
   };
 
-    const handleDeleteConditionClick = (condition) => {
+  const handleDeleteConditionClick = (condition) => {
     setConditionToDelete(condition);
     setPatientToEdit(patient);
     setIsModalOpen(true);
   };
 
-    const handleDelete = async () => {
+  const handleDelete = async () => {
     if (patientToDelete) {
       await deleteData("patients", patientToDelete._id, () => {
         setIsModalOpen(false);
@@ -123,8 +129,8 @@ export function PatientRecords() {
   };
 
   useEffect(() => {
-    setLoading(patientLoading);
-  }, [patientLoading]);
+    setLoading(patientLoading || appointmentsLoading);
+  }, [patientLoading, appointmentsLoading]);
 
   if (loading) return <p>Loading...</p>;
 
@@ -191,6 +197,28 @@ export function PatientRecords() {
           )}
         </div>
       </div>
+      <div id="appointments-container">
+        <h4>Appointment history:</h4>
+        {appointmentsLoading ? (
+          <p>Loading appointments...</p>
+        ) : (
+          <div>
+          {appointments.map((appointment) => {
+            return (
+              <AppointmentBox
+                key={appointment._id}
+                item={appointment}
+                // appointmentDate={appointment.appointmentDate}
+                // doctorName={appointment.doctorName}
+                // report={appointment.report}
+              />
+            );
+          })}
+        </div>
+        
+        )}
+      </div>
+
       {isEditModalOpen && (
         <EditInfoModal
           dataInfo={isAddingCondition || conditionToEdit ? {} : patient}
