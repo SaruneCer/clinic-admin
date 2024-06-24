@@ -6,11 +6,15 @@ import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import { CreateScheduleModal } from "../components/CreateScheduleModal";
 import { AlertModal } from "../components/AlertModal";
 import { ScheduleModal } from "../components/ScheduleModal";
+import { FaCalendarAlt } from "react-icons/fa";
 import moment from "moment";
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+import DatePicker from "react-datepicker";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "../styles/customCalendar.css";
-import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+import "react-datepicker/dist/react-datepicker.css";
+import "../styles/home.css";
 
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 const localizer = momentLocalizer(moment);
@@ -33,30 +37,33 @@ export function Home() {
   const [alertMessage, setAlertMessage] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     if (!schedules) return;
 
-    const filteredEvents = schedules.map((schedule) => ({
-      id: schedule._id,
-      title: schedule.title || "Untitled",
-      start: new Date(schedule.start),
-      end: new Date(schedule.end),
-      allDay: false,
-      data: {
-        procedure: schedule.data.procedure,
-        comment: schedule.data.comment || "",
-      },
-      resourceId: schedule.doctorID,
-      tooltip: `Procedure: ${schedule.data.procedure}, Comment: ${
-        schedule.data.comment || "No comment"
-      }`,
+    const filteredEvents = schedules
+      .filter((schedule) => moment(schedule.start).isSame(selectedDate, "day"))
+      .map((schedule) => ({
+        id: schedule._id,
+        title: schedule.title || "Untitled",
+        start: new Date(schedule.start),
+        end: new Date(schedule.end),
+        allDay: false,
+        data: {
+          procedure: schedule.data.procedure,
+          comment: schedule.data.comment || "",
+        },
+        resourceId: schedule.doctorID,
+        tooltip: `Procedure: ${schedule.data.procedure}, Comment: ${
+          schedule.data.comment || "No comment"
+        }`,
         patientID: schedule.patientID || "",
-      patientPhone: schedule.patientPhone || ""
-    }));
+        patientPhone: schedule.patientPhone || "",
+      }));
 
     setEvents(filteredEvents);
-  }, [schedules]);
+  }, [schedules, selectedDate]);
 
   const handleDoctorChange = (event) => {
     const doctorID = event.target.value;
@@ -67,10 +74,29 @@ export function Home() {
     } else {
       setView(Views.DAY);
     }
+    setSelectedDate(new Date());
   };
 
   const handleViewChange = (newView) => {
     setView(newView);
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
+
+  const isEventOverlapping = (newEvent, eventsToCheck) => {
+    return eventsToCheck.some((existingEvent) => {
+      return (
+        newEvent.resourceId === existingEvent.resourceId &&
+        ((newEvent.start >= existingEvent.start &&
+          newEvent.start < existingEvent.end) ||
+          (newEvent.end > existingEvent.start &&
+            newEvent.end <= existingEvent.end) ||
+          (newEvent.start <= existingEvent.start &&
+            newEvent.end >= existingEvent.end))
+      );
+    });
   };
 
   const handleOpenCreateScheduleModal = (slotInfo) => {
@@ -84,14 +110,13 @@ export function Home() {
       return;
     }
 
-    const isOverlapping = events.some((event) => {
-      return (
-        event.resourceId === slotInfo.resourceId &&
-        ((slotInfo.start >= event.start && slotInfo.start < event.end) ||
-          (slotInfo.end > event.start && slotInfo.end <= event.end) ||
-          (slotInfo.start <= event.start && slotInfo.end >= event.end))
-      );
-    });
+    const newEvent = {
+      resourceId: slotInfo.resourceId,
+      start: slotInfo.start,
+      end: slotInfo.end,
+    };
+
+    const isOverlapping = isEventOverlapping(newEvent, events);
 
     if (!isOverlapping) {
       setSelectedSlot(slotInfo);
@@ -111,31 +136,29 @@ export function Home() {
   const handleCloseAlertModal = () => {
     setIsAlertModalOpen(false);
   };
-
   const handleMoveEvent = async ({ event, start, end, resourceId }) => {
-    const isOverlapping = events.some((existingEvent) => {
-      return (
-        event.id !== existingEvent.id &&
-        event.resourceId === existingEvent.resourceId &&
-        ((start >= existingEvent.start && start < existingEvent.end) ||
-          (end > existingEvent.start && end <= existingEvent.end) ||
-          (start <= existingEvent.start && end >= existingEvent.end))
-      );
-    });
-  
+    const newEvent = {
+      id: event.id,
+      resourceId: resourceId,
+      start: start,
+      end: end,
+    };
+
+    const isOverlapping = isEventOverlapping(newEvent, events);
+
     if (isOverlapping) {
       setAlertMessage("Your event overlaps with an existing appointment.");
       setIsAlertModalOpen(true);
       return;
     }
-  
+
     const updatedEvents = events.map((existingEvent) =>
       existingEvent.id === event.id
         ? { ...existingEvent, start, end, resourceId }
         : existingEvent
     );
     setEvents(updatedEvents);
-  
+
     try {
       const updatedEvent = {
         ...event,
@@ -143,7 +166,7 @@ export function Home() {
         end: end.toISOString(),
         doctorID: resourceId,
       };
-  
+
       await editData("schedules", event.id, updatedEvent, "info");
     } catch (error) {
       console.error("Error updating event:", error);
@@ -166,7 +189,6 @@ export function Home() {
       };
 
       await editData("schedules", event.id, updatedEvent, "info");
-      // rerender();
     } catch (error) {
       console.error("Error updating event:", error);
     }
@@ -267,6 +289,25 @@ export function Home() {
     );
   };
 
+  const CustomDatepickerInput = ({ value, onClick }) => {
+    return (
+      <div className="date-picker-input-group">
+        <div className="calendar-icon-wrapper">
+          <span className="calendar-icon">
+            <FaCalendarAlt />
+          </span>
+        </div>
+        <input
+          type="text"
+          className="form-control"
+          value={value}
+          onClick={onClick}
+          readOnly
+        />
+      </div>
+    );
+  };
+
   const resources = selectedDoctorID
     ? doctors
         .filter((doctor) => doctor._id === selectedDoctorID)
@@ -280,21 +321,33 @@ export function Home() {
       }));
   return (
     <main>
-      <div className="home">
-        <div>
-          <label htmlFor="doctorSelect">Select Doctor: </label>
-          <select
-            id="doctorSelect"
-            onChange={handleDoctorChange}
-            value={selectedDoctorID}
-          >
-            <option value="">All Doctors</option>
-            {doctors.map((doctor) => (
-              <option key={doctor._id} value={doctor._id}>
-                {doctor.name}
-              </option>
-            ))}
-          </select>
+      <div id="calendar-container">
+        <div className="selection-container">
+          <div className="doctor-selection-wrapper">
+            <select
+              className="doctorSelect"
+              onChange={handleDoctorChange}
+              value={selectedDoctorID}
+            >
+              <option value="">All Doctors</option>
+              {doctors.map((doctor) => (
+                <option key={doctor._id} value={doctor._id}>
+                  {doctor.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="date-picker-wrapper">
+            <label>
+              <DatePicker
+                customInput={<CustomDatepickerInput />}
+                selected={selectedDate}
+                onChange={handleDateChange}
+                dateFormat="dd/MM/yyyy"
+              />
+            </label>
+          </div>
         </div>
 
         <DragAndDropCalendar
@@ -307,10 +360,9 @@ export function Home() {
           endAccessor="end"
           style={{ height: 1200 }}
           view={view}
+          date={selectedDate}
           views={
-            selectedDoctorID
-              ? { day: true, work_week: true, month: true }
-              : { day: true }
+            selectedDoctorID ? { day: true, work_week: true } : { day: true }
           }
           step={15}
           timeslots={1}
@@ -320,6 +372,7 @@ export function Home() {
           now={now}
           onEventDrop={handleMoveEvent}
           onEventResize={handleResizeEvent}
+          onNavigate={setSelectedDate}
           popup
           resizable
           selectable
@@ -363,8 +416,6 @@ export function Home() {
             onDelete={handleDelete}
             onSave={handleSaveEditedSchedule}
             doctors={doctors}
-            //   procedures={procedures}
-            //   existingCategories={categories}
           />
         )}
       </div>
