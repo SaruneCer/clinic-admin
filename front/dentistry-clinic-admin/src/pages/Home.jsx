@@ -113,13 +113,29 @@ export function Home() {
   };
 
   const handleMoveEvent = async ({ event, start, end, resourceId }) => {
+    const isOverlapping = events.some((existingEvent) => {
+      return (
+        event.id !== existingEvent.id &&
+        event.resourceId === existingEvent.resourceId &&
+        ((start >= existingEvent.start && start < existingEvent.end) ||
+          (end > existingEvent.start && end <= existingEvent.end) ||
+          (start <= existingEvent.start && end >= existingEvent.end))
+      );
+    });
+  
+    if (isOverlapping) {
+      setAlertMessage("Your event overlaps with an existing appointment.");
+      setIsAlertModalOpen(true);
+      return;
+    }
+  
     const updatedEvents = events.map((existingEvent) =>
       existingEvent.id === event.id
         ? { ...existingEvent, start, end, resourceId }
         : existingEvent
     );
     setEvents(updatedEvents);
-
+  
     try {
       const updatedEvent = {
         ...event,
@@ -127,7 +143,7 @@ export function Home() {
         end: end.toISOString(),
         doctorID: resourceId,
       };
-
+  
       await editData("schedules", event.id, updatedEvent, "info");
     } catch (error) {
       console.error("Error updating event:", error);
