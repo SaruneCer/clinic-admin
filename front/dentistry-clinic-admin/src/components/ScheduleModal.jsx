@@ -21,7 +21,6 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   const [isAddingAppointment, setIsAddingAppointment] = useState(false);
   const [isAddingPatient, setIsAddingPatient] = useState(false);
   const [alertMessage, setAlertMessage] = useState(null);
-  const [patientAdded, setPatientAdded] = useState(false);
   const { data: patients, loading, rerender } = useGetData("patients");
 
   useEffect(() => {
@@ -112,19 +111,14 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   };
 
   const handleAppointmentReportClick = () => {
-    const eventPatientName = event.title;
+    const eventPatientID = event.patientID;
 
     const isPatientExists = patients.some((patient) => {
       if (loading) {
-        return (
-          <>
-            <p>Loading...</p>
-          </>
-        );
+        return false;
       }
 
-      const patientName = `${patient.name} ${patient.lastname}`;
-      return patientName === eventPatientName;
+      return patient._id === eventPatientID;
     });
 
     if (isPatientExists) {
@@ -141,10 +135,8 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   const handleAddFormCloseModal = () => {
     setIsAddFormModalOpen(false);
     setIsAddingAppointment(false);
-    if (isAddingPatient) {
-      setPatientAdded(true);
-      setIsAddingPatient(false);
-    }
+
+    setIsAddingPatient(false);
   };
 
   const renderDoctorSelect = () => {
@@ -210,11 +202,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
           buttonText="APPOINTMENT REPORT"
           onClick={handleAppointmentReportClick}
         />
-        <Button
-          buttonText={patientAdded ? "PATIENT ADDED ✔︎" : "ADD PATIENT"}
-          onClick={handleAddPatientClick}
-          disabled={patientAdded}
-        />
+        <Button buttonText={"ADD PATIENT"} onClick={handleAddPatientClick} />
         <form className="edit-form">
           {renderFormFields()}
           <div className="modal-buttons">
