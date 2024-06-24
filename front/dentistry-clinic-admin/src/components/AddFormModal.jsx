@@ -8,8 +8,8 @@ export function AddFormModal({
   onClose,
   rerender,
   existingCategories = [],
-  slotInfo,
   procedures,
+  slotInfo
 }) {
   const fieldConfigurations = {
     doctors: [
@@ -54,43 +54,9 @@ export function AddFormModal({
           "Appointment details, prescribed medications and next scheduled appointments.",
       },
     ],
-    schedules: [
-      { name: "patientName", type: "text", placeholder: "Patient's Name" },
-      {
-        name: "patientLastname",
-        type: "text",
-        placeholder: "Patient's Lastname",
-      },
-      { name: "category", type: "select", placeholder: "Category" },
-      { name: "procedureName", type: "select", placeholder: "Procedure name" },
-      { name: "comment", type: "text", placeholder: "Comment" },
-      {
-        name: "start",
-        type: "datetime-local",
-        placeholder: "Start Date and Time",
-      },
-      { name: "end", type: "datetime-local", placeholder: "End Date and Time" },
-    ],
   };
 
-  const toDateTimeLocalString = (date) => {
-    const pad = (num) => String(num).padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-      date.getDate()
-    )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-  };
-
-  const initialFormData =
-    resource === "schedules" && slotInfo
-      ? {
-          start: slotInfo.start
-            ? toDateTimeLocalString(new Date(slotInfo.start))
-            : "",
-          end: slotInfo.end
-            ? toDateTimeLocalString(new Date(slotInfo.end))
-            : "",
-        }
-      : {};
+  const initialFormData = {};
 
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
@@ -98,17 +64,6 @@ export function AddFormModal({
   const [filteredProcedures, setFilteredProcedures] = useState([]);
   const { postData, isLoading } = usePostData(resource);
 
-  useEffect(() => {
-    if (resource === "schedules" && slotInfo) {
-      setFormData((prevData) => ({
-        ...prevData,
-        start: slotInfo.start
-          ? toDateTimeLocalString(new Date(slotInfo.start))
-          : "",
-        end: slotInfo.end ? toDateTimeLocalString(new Date(slotInfo.end)) : "",
-      }));
-    }
-  }, [slotInfo, resource]);
 
   useEffect(() => {
     if (selectedCategory) {
@@ -122,23 +77,6 @@ export function AddFormModal({
     }
   }, [selectedCategory, procedures]);
 
-  const formatDateAndTime = (date) => {
-    const pad = (number) => number.toString().padStart(2, "0");
-
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    const seconds = pad(date.getSeconds());
-
-    const timezoneOffset = -date.getTimezoneOffset();
-    const sign = timezoneOffset >= 0 ? "+" : "-";
-    const offsetHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
-    const offsetMinutes = pad(Math.abs(timezoneOffset) % 60);
-
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${offsetHours}:${offsetMinutes}`;
-  };
 
   const fields = fieldConfigurations[resource] || [];
 
@@ -172,13 +110,6 @@ export function AddFormModal({
       const phoneRegex = /^\+\d{1,3}\d{6,14}$/;
       if (!phoneRegex.test(phoneValue)) {
         newErrors[phoneField.name] = "Number invalid";
-      }
-    }
-    if (resource === "schedules") {
-      const { start, end } = formData;
-      if (new Date(start) >= new Date(end)) {
-        newErrors.start = "Start time must be before end time";
-        newErrors.end = "End time must be after start time";
       }
     }
 
@@ -234,29 +165,12 @@ export function AddFormModal({
         delete structuredData.newCategory;
       }
 
-      if (resource === "schedules") {
-        if (slotInfo?.resourceId) {
-          structuredData.doctorID = slotInfo.resourceId;
-        }
-
-        if (formData.start && formData.end) {
-          structuredData.start = formatDateAndTime(new Date(formData.start));
-          structuredData.end = formatDateAndTime(new Date(formData.end));
-        }
-
-        structuredData.title = `${formData.patientName} ${formData.patientLastname}`;
-        structuredData.data = {
-          procedure: formData.procedureName,
-          comment: formData.comment,
-        };
-
-        delete structuredData.procedureName;
-        delete structuredData.comment;
-        delete structuredData.patientName;
-      }
-
       if (resource === "appointments") {
+        const dateObject = new Date(slotInfo.date)
+        const formattedDate = dateObject.toISOString().split("T")[0]
+
         structuredData.doctorID = slotInfo.doctorID;
+        structuredData.appointmentDate = formattedDate;
       }
 
       await postData(structuredData);
@@ -353,20 +267,16 @@ export function AddFormModal({
                   )}
                 </>
               )}
-              {!(resource === "appointments" && field.name === "report") &&
-                !(
-                  resource === "schedules" &&
-                  field.name === "procedure" &&
-                  field.name === "category"
-                ) && (
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    placeholder={field.placeholder}
-                    value={formData[field.name] || ""}
-                    onChange={handleChange}
-                  />
-                )}
+              {!(resource === "appointments" && field.name === "report") && (
+
+                <input
+                  type={field.type}
+                  name={field.name}
+                  placeholder={field.placeholder}
+                  value={formData[field.name] || ""}
+                  onChange={handleChange}
+                />
+              )}
 
               {errors[field.name] && (
                 <p className="error-message">{errors[field.name]}</p>
