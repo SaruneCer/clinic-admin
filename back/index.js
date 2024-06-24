@@ -514,42 +514,6 @@ app.post("/dentistry_clinic_admin/appointments/", async (req, res) => {
   }
 });
 
-app.patch("/dentistry_clinic_admin/appointments/:id", async (req, res) => {
-  try {
-    await connect();
-    const objectId = new ObjectId(req.params.id);
-    const collection = db.collection("appointments");
-    const editedInfo = req.body;
-
-    const updateFields = {};
-    if (editedInfo.doctorName) {
-      updateFields.doctorName = editedInfo.doctorName;
-    }
-    if (editedInfo.patientName) {
-      updateFields.patientName = editedInfo.patientName;
-    }
-    if (editedInfo.procedureName) {
-      updateFields.procedureName = editedInfo.procedureName;
-    }
-    if (editedInfo.comment) {
-      updateFields.comment = editedInfo.comment;
-    }
-
-    const result = await collection.updateOne(
-      { _id: objectId },
-      { $set: updateFields }
-    );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Appointment not found" });
-    }
-
-    res.json({ message: "Appointment information updated successfully" });
-  } catch (e) {
-    console.error("Error editing appointment information:", e);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 // schedules
 
