@@ -34,6 +34,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
         comment: event.data.comment,
         start: event.start ? toDateTimeLocalString(new Date(event.start)) : "",
         end: event.end ? toDateTimeLocalString(new Date(event.end)) : "",
+        patientID: event.patientID,
       });
     }
   }, [event]);
@@ -74,6 +75,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
       start: formatDateAndTime(new Date(formData.start)),
       end: formatDateAndTime(new Date(formData.end)),
       doctorID: formData.doctorID,
+      patientID: formData.patientID,
       data: {
         procedure: formData.procedure,
         comment: formData.comment,
@@ -86,6 +88,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData({ ...formData, [name]: value });
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
@@ -109,9 +112,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   };
 
   const handleAppointmentReportClick = () => {
-    console.log(patients);
     const eventPatientName = event.title;
-    console.log(eventPatientName);
 
     const isPatientExists = patients.some((patient) => {
       if (loading) {
@@ -168,7 +169,9 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
 
   const renderFormFields = () => {
     return Object.keys(formData).map((key) => {
-      if (key === "eventID") return null;
+      if (key === "eventID" || key === "patientID") {
+        return null;
+      }
 
       const value = formData[key];
       if (key === "doctorID") {
@@ -197,9 +200,9 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   };
 
   return (
-    <div className="modal">
-      <div className="modal-content">
-        <span className="close-button" onClick={onClose}>
+    <div id="add-modal">
+      <div className="form-container">
+        <span className="close" onClick={onClose}>
           &times;
         </span>
         <h2>Appointment Info</h2>
@@ -267,8 +270,12 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
           resource="appointments"
           onClose={handleAddFormCloseModal}
           existingCategories={[]}
-                  rerender={rerender}
-                  slotInfo={{ doctorID: formData.doctorID, patientName: formData.patientName }}
+          rerender={rerender}
+          appointmentInfo={{
+            doctorID: formData.doctorID,
+            patientID: formData.patientID,
+            date: formData.start,
+          }}
         />
       )}
       {isAddFormModalOpen && isAddingPatient && (

@@ -9,7 +9,7 @@ export function AddFormModal({
   rerender,
   existingCategories = [],
   procedures,
-  slotInfo
+  appointmentInfo,
 }) {
   const fieldConfigurations = {
     doctors: [
@@ -40,13 +40,13 @@ export function AddFormModal({
     ],
     appointments: [
       // { name: "doctorName", type: "text", placeholder: "Doctor's name" },
-      { name: "patientName", type: "text", placeholder: "Patient's Name" },
-      {
-        name: "patientLastname",
-        type: "text",
-        placeholder: "Patient's Lastname",
-      },
-      { name: "procedureName", type: "text", placeholder: "Procedure name" },
+      // { name: "patientName", type: "text", placeholder: "Patient's Name" },
+      // {
+      //   name: "patientLastname",
+      //   type: "text",
+      //   placeholder: "Patient's Lastname",
+      // },
+      // { name: "procedureName", type: "text", placeholder: "Procedure name" },
       {
         name: "report",
         type: "textarea",
@@ -56,6 +56,8 @@ export function AddFormModal({
     ],
   };
 
+  console.log(appointmentInfo);
+
   const initialFormData = {};
 
   const [formData, setFormData] = useState(initialFormData);
@@ -63,7 +65,6 @@ export function AddFormModal({
   const [selectedCategory, setSelectedCategory] = useState("");
   const [filteredProcedures, setFilteredProcedures] = useState([]);
   const { postData, isLoading } = usePostData(resource);
-
 
   useEffect(() => {
     if (selectedCategory) {
@@ -76,7 +77,6 @@ export function AddFormModal({
       setFilteredProcedures(procedures);
     }
   }, [selectedCategory, procedures]);
-
 
   const fields = fieldConfigurations[resource] || [];
 
@@ -166,10 +166,11 @@ export function AddFormModal({
       }
 
       if (resource === "appointments") {
-        const dateObject = new Date(slotInfo.date)
-        const formattedDate = dateObject.toISOString().split("T")[0]
+        const dateObject = new Date(appointmentInfo.date);
+        const formattedDate = dateObject.toISOString().split("T")[0];
 
-        structuredData.doctorID = slotInfo.doctorID;
+        structuredData.doctorID = appointmentInfo.doctorID;
+        structuredData.patientID = appointmentInfo.patientID;
         structuredData.appointmentDate = formattedDate;
       }
 
@@ -268,7 +269,6 @@ export function AddFormModal({
                 </>
               )}
               {!(resource === "appointments" && field.name === "report") && (
-
                 <input
                   type={field.type}
                   name={field.name}

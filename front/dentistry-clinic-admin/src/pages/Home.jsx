@@ -3,7 +3,7 @@ import { useGetData } from "../customHooks/useGetData";
 import { useEditData } from "../customHooks/useEditData";
 import { useDeleteData } from "../customHooks/useDeleteData";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
-import { AddFormModal } from "../components/AddFormModal";
+import { CreateScheduleModal } from "../components/CreateScheduleModal";
 import { AlertModal } from "../components/AlertModal";
 import { ScheduleModal } from "../components/ScheduleModal";
 import moment from "moment";
@@ -25,7 +25,8 @@ export function Home() {
 
   const [selectedDoctorID, setSelectedDoctorID] = useState("");
   const [events, setEvents] = useState([]);
-  const [isAddFormModalOpen, setIsAddFormModalOpen] = useState(false);
+  const [isCreateScheduleModalOpen, setCreateScheduleModalOpen] =
+    useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [view, setView] = useState(Views.DAY);
@@ -46,8 +47,9 @@ export function Home() {
         procedure: schedule.data.procedure,
         comment: schedule.data.comment,
       },
-      resourceId: schedule.doctorID, // Use the doctor's ID here
+      resourceId: schedule.doctorID,
       tooltip: `Procedure: ${schedule.data.procedure}, Comment: ${schedule.data.comment}`,
+      patientID: schedule.patientID,
     }));
 
     setEvents(filteredEvents);
@@ -68,7 +70,7 @@ export function Home() {
     setView(newView);
   };
 
-  const handleOpenAddModal = (slotInfo) => {
+  const handleOpenCreateScheduleModal = (slotInfo) => {
     const day = slotInfo.start.getDay();
 
     if (day === 0 || day === 6) {
@@ -90,7 +92,7 @@ export function Home() {
 
     if (!isOverlapping) {
       setSelectedSlot(slotInfo);
-      setIsAddFormModalOpen(true);
+      setCreateScheduleModalOpen(true);
     } else {
       setAlertMessage(
         "Your selected time overlaps with an existing appointment. Please choose another time."
@@ -99,8 +101,8 @@ export function Home() {
     }
   };
 
-  const handleCloseAddModal = () => {
-    setIsAddFormModalOpen(false);
+  const handleCloseCreateScheduleModal = () => {
+    setCreateScheduleModalOpen(false);
   };
 
   const handleCloseAlertModal = () => {
@@ -257,7 +259,6 @@ export function Home() {
         id: doctor._id,
         title: doctor.name,
       }));
-
   return (
     <main>
       <div className="home">
@@ -303,7 +304,7 @@ export function Home() {
           popup
           resizable
           selectable
-          onSelectSlot={handleOpenAddModal}
+          onSelectSlot={handleOpenCreateScheduleModal}
           tooltipAccessor="tooltip"
           formats={formats}
           components={{
@@ -312,10 +313,10 @@ export function Home() {
           onView={handleViewChange}
           onDoubleClickEvent={handleDoubleClickEvent}
         />
-        {isAddFormModalOpen && (
-          <AddFormModal
+        {isCreateScheduleModalOpen && (
+          <CreateScheduleModal
             resource="schedules"
-            onClose={handleCloseAddModal}
+            onClose={handleCloseCreateScheduleModal}
             rerender={rerender}
             slotInfo={selectedSlot}
             procedures={procedures}
@@ -343,6 +344,8 @@ export function Home() {
             onDelete={handleDelete}
             onSave={handleSaveEditedSchedule}
             doctors={doctors}
+            //   procedures={procedures}
+            //   existingCategories={categories}
           />
         )}
       </div>
