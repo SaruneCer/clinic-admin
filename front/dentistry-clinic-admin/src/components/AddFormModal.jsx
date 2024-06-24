@@ -10,6 +10,7 @@ export function AddFormModal({
   existingCategories = [],
   procedures,
   appointmentInfo,
+  initialFormData
 }) {
   const fieldConfigurations = {
     doctors: [
@@ -39,14 +40,6 @@ export function AddFormModal({
       { name: "category", type: "select", placeholder: "Category" },
     ],
     appointments: [
-      // { name: "doctorName", type: "text", placeholder: "Doctor's name" },
-      // { name: "patientName", type: "text", placeholder: "Patient's Name" },
-      // {
-      //   name: "patientLastname",
-      //   type: "text",
-      //   placeholder: "Patient's Lastname",
-      // },
-      // { name: "procedureName", type: "text", placeholder: "Procedure name" },
       {
         name: "report",
         type: "textarea",
@@ -56,15 +49,16 @@ export function AddFormModal({
     ],
   };
 
-  console.log(appointmentInfo);
-
-  const initialFormData = {};
 
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("");
   const [filteredProcedures, setFilteredProcedures] = useState([]);
   const { postData, isLoading } = usePostData(resource);
+
+  useEffect(() => {
+    setFormData(initialFormData); 
+  }, [initialFormData]);
 
   useEffect(() => {
     if (selectedCategory) {

@@ -35,7 +35,9 @@ export function useGetData(resource) {
               item.end &&
               item.doctorID &&
               item.data?.procedure &&
-              item.data?.comment
+              item.data?.comment &&
+              item.patientPhone &&
+              item.patientID
             );
           }
           return true;

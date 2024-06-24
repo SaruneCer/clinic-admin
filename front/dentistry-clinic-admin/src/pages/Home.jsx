@@ -45,11 +45,14 @@ export function Home() {
       allDay: false,
       data: {
         procedure: schedule.data.procedure,
-        comment: schedule.data.comment,
+        comment: schedule.data.comment || "",
       },
       resourceId: schedule.doctorID,
-      tooltip: `Procedure: ${schedule.data.procedure}, Comment: ${schedule.data.comment}`,
-      patientID: schedule.patientID,
+      tooltip: `Procedure: ${schedule.data.procedure}, Comment: ${
+        schedule.data.comment || "No comment"
+      }`,
+        patientID: schedule.patientID || "",
+      patientPhone: schedule.patientPhone || ""
     }));
 
     setEvents(filteredEvents);
@@ -242,7 +245,7 @@ export function Home() {
 
         <div className="procedure-comment-wrapper">
           <p className="procedure-title">{event.data?.procedure}</p>
-          <p className="procedure-comment">{event.data?.comment}</p>
+          <p className="procedure-comment">{event.data?.comment || ""}</p>
         </div>
       </div>
     );

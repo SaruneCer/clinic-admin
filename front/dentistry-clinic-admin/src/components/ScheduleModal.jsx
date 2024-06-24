@@ -24,16 +24,21 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   const { data: patients, loading, rerender } = useGetData("patients");
 
   useEffect(() => {
-    if (event) {
+      if (event) {
+        
+        const [firstName, lastName] = event.title.split(' ');
+          
       setFormData({
         eventID: event.id,
         doctorID: event.resourceId,
-        patientName: event.title,
+        patientName: firstName || '', 
+        patientLastname: lastName || '', 
         procedure: event.data.procedure,
-        comment: event.data.comment,
+        comment: event.data.comment || "",
         start: event.start ? toDateTimeLocalString(new Date(event.start)) : "",
         end: event.end ? toDateTimeLocalString(new Date(event.end)) : "",
-        patientID: event.patientID,
+          patientID: event.patientID,
+        patientPhone: event.patientPhone || ""
       });
     }
   }, [event]);
@@ -70,7 +75,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
 
     const structuredData = {
       id: formData.eventID,
-      title: formData.patientName,
+      title: `${formData.patientName} ${formData.patientLastname}`,
       start: formatDateAndTime(new Date(formData.start)),
       end: formatDateAndTime(new Date(formData.end)),
       doctorID: formData.doctorID,
@@ -271,7 +276,12 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
           resource="patients"
           onClose={handleAddFormCloseModal}
           existingCategories={[]}
-          rerender={rerender}
+                  rerender={rerender}
+                  initialFormData={{
+                      name: formData.patientName,
+                      lastname:formData.patientLastname,
+                      phone: formData.patientPhone
+                  }}
         />
       )}
     </div>
