@@ -76,10 +76,11 @@ export function Patients() {
     <main>
       <header>
         <Button buttonText={"+ ADD PATIENT"} onClick={handleAddClick} />
-        <SearchInput
+        <div className="patient-records-search-input-container"> <SearchInput
           searchValue={searchValue}
           setSearchValue={setSearchValue}
-        />
+        /></div>
+       
       </header>
       <div className="alphabet-nav">
         {letters.map((letter) => (
