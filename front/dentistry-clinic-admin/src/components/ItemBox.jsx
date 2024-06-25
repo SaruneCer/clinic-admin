@@ -44,10 +44,10 @@ export function ItemBox({
 
       {itemType === "medical-condition" && (
         <>
-          <p>
+          <p className="condition-p-element">
             <strong>Condition:</strong> {item.conditions}
           </p>
-          <p>
+          <p className="condition-p-element">
             <strong>Notes:</strong> {item.notes}
           </p>
         </>
