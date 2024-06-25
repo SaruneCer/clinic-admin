@@ -9,7 +9,7 @@ import { useDeleteData } from "../customHooks/useDeleteData";
 import { AlertModal } from "../components/AlertModal";
 import { useNavigate } from "react-router-dom";
 import { AppointmentBox } from "../components/AppointmentBox";
-
+import "../styles/patientRecords.css";
 
 export function PatientRecords() {
   const { patientID } = useParams();
@@ -32,7 +32,6 @@ export function PatientRecords() {
   const { deleteData } = useDeleteData();
   const navigate = useNavigate();
   const [conditionToDelete, setConditionToDelete] = useState(null);
-
 
   const handleEditPersonalInfoClick = () => {
     setIsEditModalOpen(true);
@@ -147,75 +146,89 @@ export function PatientRecords() {
   return (
     <main>
       <header>
-        <h1>
+        <h1 className="patient-name-h1">
           {patient.name} {patient.lastname}
         </h1>
       </header>
 
       <div>
-        <div className="personal-info-container">
-          <div className="header-wrapper">
-            {" "}
-            <h3>Personal Information</h3>
-            <Button
-              buttonText={"EDIT INFO"}
-              onClick={handleEditPersonalInfoClick}
-            />
-            <Button
-              buttonText={"DELETE PATIENT"}
-              onClick={handleDeletePatientClick}
-            />
+        <div id="personal-info-container">
+          <div className="personal-info-column-wrapper">
+            <div className="header-wrapper">
+              {" "}
+              <h3>Personal Information</h3>
+              <div className="buttons-wrapper">
+                {" "}
+                <Button
+                  buttonText={"EDIT INFO"}
+                  onClick={handleEditPersonalInfoClick}
+                />
+                <Button
+                  buttonText={"DELETE PATIENT"}
+                  onClick={handleDeletePatientClick}
+                />
+              </div>
+            </div>
+
+            <p>
+              <strong>Date of Birth:</strong> {patient.dob}
+            </p>
+            <p>
+              <strong>Phone:</strong> {patient.contactInfo.phone}
+            </p>
+            <p>
+              <strong>Email:</strong> {patient.contactInfo.email}
+            </p>
+            <p>
+              <strong>Address:</strong> {patient.address}
+            </p>
           </div>
 
-          <p>Date of Birth: {patient.dob}</p>
-          <p>Phone: {patient.contactInfo.phone}</p>
-          <p>Email: {patient.contactInfo.email}</p>
-          <p>Address: {patient.address}</p>
-        </div>
-        <div className="medical-history-container">
-          <div className="header-wrapper">
-            {" "}
-            <h3>Medical History</h3>
-            <Button
-              buttonText={"ADD CONDITION"}
-              onClick={handleAddConditionClick}
-            />
-          </div>
+          <div className="personal-info-column-wrapper">
+            <div className="header-wrapper">
+              {" "}
+              <h3>Medical History</h3>
+              <div className="buttons-wrapper">
+                {" "}
+                <Button
+                  buttonText={"ADD CONDITION"}
+                  onClick={handleAddConditionClick}
+                />
+              </div>
+            </div>
 
-          {isMedicalHistoryEmpty ? (
-            <p>No medical conditions known.</p>
-          ) : (
-            patient.medicalHistory.map((history, index) => (
-              <ItemBox
-                key={index}
-                item={history}
-                itemType="medical-condition"
-                handleDeleteClick={handleDeleteConditionClick}
-                handleEditClick={handleEditConditionClick}
-              />
-            ))
-          )}
+            <div className="medical-condition-wrapper">
+              {isMedicalHistoryEmpty ? (
+                <p>No medical conditions known.</p>
+              ) : (
+                patient.medicalHistory.map((history, index) => (
+                  <ItemBox
+                    key={index}
+                    item={history}
+                    itemType="medical-condition"
+                    handleDeleteClick={handleDeleteConditionClick}
+                    handleEditClick={handleEditConditionClick}
+                  />
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
+      <h3>Appointment history</h3>
       <div id="appointments-container">
-        <h4>Appointment history:</h4>
         {appointmentsLoading ? (
           <p>Loading appointments...</p>
         ) : (
           <div>
-          {appointments.map((appointment) => {
-            return (
-              <AppointmentBox
-                key={appointment._id}
-                item={appointment}
-                // appointmentDate={appointment.appointmentDate}
-                // doctorName={appointment.doctorName}
-                // report={appointment.report}
-              />
-            );
-          })}
-        </div>
-        
+            {appointments.length === 0 ? (
+              <p>No appointments found</p>
+            ) : (
+              appointments.map((appointment) => (
+                <AppointmentBox key={appointment._id} item={appointment} />
+              ))
+            )}
+          </div>
         )}
       </div>
 
