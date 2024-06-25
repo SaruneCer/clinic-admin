@@ -11,7 +11,6 @@ export function Navigation() {
 
   useEffect(() => {
     setActiveLink(location.pathname);
-    // Close menu when the location changes
     setMenuOpen(false);
   }, [location]);
 
