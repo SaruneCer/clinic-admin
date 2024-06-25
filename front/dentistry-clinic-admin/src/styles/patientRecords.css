@@ -1,0 +1,70 @@
+.patient-name-h1 {
+  font-weight: 600;
+}
+
+#personal-info-container {
+  display: flex;
+  align-items: flex-start;
+}
+
+.personal-info-column-wrapper:first-child {
+  margin-right: 60px;
+  padding-right: 20px;
+}
+
+.personal-info-column-wrapper:last-child {
+  flex-grow: 3;
+}
+
+.medical-condition-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+}
+
+.buttons-wrapper {
+  width: 100%;
+  margin: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#appointments-container {
+  display: flex;
+  width: 100%;
+}
+.appointment-box {
+  padding: 15px;
+  border-radius: 6px;
+  background-color: white;
+  height: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 800px) {
+  #personal-info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    display: flex;
+    justify-content: center;
+  }
+
+  .header-wrapper,
+  .personal-info-column-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .header-wrapper {
+    width: auto;
+  }
+
+  .personal-info-column-wrapper:first-child {
+    margin-right: 0;
+    padding-right: 0;
+  }
+}

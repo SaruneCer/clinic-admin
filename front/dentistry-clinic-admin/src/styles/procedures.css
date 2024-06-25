@@ -1,0 +1,101 @@
+.fas .fa-clock,
+.fas .fa-money-bill-wave,
+.fa-chevron-circle-up,
+.fa-chevron-circle-down {
+  color: rgb(44, 87, 121);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.category {
+  background-color: white;
+  border: 1px solid rgb(91, 227, 227);
+  border-radius: 10px;
+  margin: 3px;
+  cursor: pointer;
+}
+.category-header {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+}
+.category-header:hover {
+  color: white;
+  background-color: rgb(44, 87, 121);
+}
+.category-header:hover i {
+  color: white;
+}
+
+.active-category-header {
+  display: flex;
+  align-items: center;
+  color: white;
+  background-color: rgb(44, 87, 121);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.category-title {
+  width: 92%;
+  margin: 0;
+  padding: 10px;
+  padding-left: 18px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.procedures-container {
+  padding: 10px;
+}
+
+.procedure-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.procedure-item {
+  border-top: 1px solid rgb(91, 227, 227);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-evenly;
+}
+.procedure-name {
+  width: 44%;
+  font-weight: 400;
+}
+
+.procedure-details {
+  display: flex;
+  align-items: center;
+  width: 30%;
+  justify-content: space-evenly;
+}
+
+.procedure-buttons {
+  width: 14%;
+  display: flex;
+  justify-content: space-between;
+}
+.fa-chevron-circle-up {
+  color: white;
+}
+
+@media (max-width: 630px) {
+  .procedure-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+  }
+  .procedure-details {
+    width: 70%;
+  }
+
+  .procedure-buttons {
+    width: 45%;
+    margin: 10px;
+  }
+}

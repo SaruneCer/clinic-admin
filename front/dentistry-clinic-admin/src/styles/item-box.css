@@ -1,0 +1,76 @@
+.item-box {
+  padding: 15px;
+  border-radius: 6px;
+  background-color: white;
+  width: 300px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease;
+}
+
+.item-box:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.item-box h2 {
+  font-size: 20px;
+  margin: 5px;
+  width: auto;
+}
+
+.specialization {
+  margin: 5px;
+  font-style: italic;
+  color: gray;
+}
+
+.contact-info-container {
+  width: 100%;
+}
+
+.contact-info-wrapper {
+  display: flex;
+  align-items: center;
+  margin: 5px;
+}
+
+.contact-info {
+  margin: 0;
+}
+
+.icon-wrapper {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: rgb(44, 87, 121);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+}
+
+.fa-envelope,
+.fa-phone,
+.fa-clock,
+.fa-money-bill-wave {
+  color: rgb(214, 218, 225);
+}
+
+.button-container {
+  margin-top: 10px;
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.condition-p-element {
+  margin: 4px;
+}
+
+.medical-condition-wrapper{
+  display: flex;
+  justify-content: space-evenly;
+}

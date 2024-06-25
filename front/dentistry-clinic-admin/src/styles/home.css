@@ -1,0 +1,63 @@
+#calendar-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.selection-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date-picker-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.react-datepicker__input-container input,
+.doctorSelect {
+  font-size: 16px;
+  padding: 5px;
+  width: 150px;
+  text-align: center;
+}
+
+.doctorSelect {
+  width: 250px;
+  text-align: left;
+}
+
+.date-picker-input-group {
+  display: flex;
+  align-items: center;
+}
+
+.calendar-icon-wrapper {
+  padding-top: 5px;
+}
+
+.calendar-icon {
+  color: #2c5779;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 1000px) {
+  #calendar-container {
+    overflow-x: scroll;
+  }
+
+  .rbc-time-view {
+    min-width: 1000px;
+  }
+
+  .rbc-header {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .rbc-event-content {
+    font-size: 14px;
+  }
+}
