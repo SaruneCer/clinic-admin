@@ -11,7 +11,7 @@ export function EditInfoModal({
   conditionToEdit,
 }) {
   const [editedInfo, setEditedInfo] = useState(dataInfo);
-    const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (isAddingCondition) {
@@ -59,14 +59,13 @@ export function EditInfoModal({
       ) {
         return (
           <div key={key} className="nested-form-group">
-            <h3>{key.charAt(0).toUpperCase() + key.slice(1)}</h3>
             {renderFormFields(value, key)}
           </div>
         );
       }
 
       return (
-        <div className="edit-form-input" key={key}>
+        <div className="input-wrapper" key={key}>
           <label htmlFor={key}>
             {key.charAt(0).toUpperCase() + key.slice(1)}:
           </label>
@@ -82,26 +81,24 @@ export function EditInfoModal({
     });
   };
 
-
-    
   return (
     <div className="modal">
-      <div className={`modal-content ${isEditing ? "is-editing" : ""}`}>
-        <span className="close-button" onClick={onClose}>
+      <div className={`form-container ${isEditing ? "is-editing" : ""}`}>
+        <span className="close" onClick={onClose}>
           &times;
         </span>
-        <h2>
-          {isAddingCondition
-            ? "Add Condition"
-            : conditionToEdit
-            ? "Edit Condition"
-            : "Edit Information"}
-        </h2>
-        <form className="edit-form">
-                  {isAddingCondition || conditionToEdit ? (
-                      
+
+        <form>
+          <h2 className="modal-h2">
+            {isAddingCondition
+              ? "ADD CONDITION"
+              : conditionToEdit
+              ? "EDIT CONDITION"
+              : "EDIT INFO"}
+          </h2>
+          {isAddingCondition || conditionToEdit ? (
             <>
-              <div className="edit-form-input">
+              <div className="input-wrapper">
                 <label htmlFor="conditions">Condition:</label>
                 <input
                   type="text"
@@ -111,7 +108,7 @@ export function EditInfoModal({
                   onChange={(e) => handleChange(e)}
                 />
               </div>
-              <div className="edit-form-input">
+              <div className="input-wrapper">
                 <label htmlFor="notes">Notes:</label>
                 <textarea
                   id="notes"
@@ -125,7 +122,7 @@ export function EditInfoModal({
             renderFormFields(editedInfo)
           )}
           {existingCategories.length > 0 && (
-            <div className="edit-form-selection">
+            <div className="input-wrapper">
               <select
                 id="category"
                 name="category"
