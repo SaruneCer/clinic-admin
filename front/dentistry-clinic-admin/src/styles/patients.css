@@ -1,0 +1,99 @@
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  justify-items: flex-start;
+}
+
+.search-input-container {
+  width: 330px;
+}
+
+.patient-records-search-input-container input {
+  border: none;
+  border-radius: 6px;
+}
+
+#patient-list-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.alphabet-nav {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+.nav-button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 20px;
+  color: rgb(44, 87, 121);
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.8px;
+}
+.nav-button:hover {
+  -webkit-text-fill-color: rgb(44, 87, 121);
+}
+
+.nav-button .alphabetical-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
+.patient-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.letter-header {
+  width: 100%;
+}
+
+h2 {
+  font-weight: normal;
+  margin-right: 15px;
+  padding: 15px 15px 0px 15px;
+  width: 100%;
+}
+.patient-names {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.patient-item {
+  margin: 0px 10px;
+  margin-left: 0;
+  width: 180px;
+  height: auto;
+}
+
+.patient-name-link {
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 6px;
+  color: rgb(44, 87, 121);
+  transition: box-shadow 0.3s ease;
+}
+
+.patient-name-link:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 630px) {
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}

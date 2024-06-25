@@ -1,0 +1,15 @@
+.basic-button {
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bolder;
+  background-color: white;
+  color: rgb(91, 227, 227);
+  border: 1px solid rgb(91, 227, 227);
+}
+
+.basic-button:hover {
+  background-color: rgb(44, 87, 121);
+  border: 1px solid rgb(44, 87, 121);
+}
+

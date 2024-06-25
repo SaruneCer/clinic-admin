@@ -1,0 +1,70 @@
+.rbc-header {
+  background-color: rgb(44, 87, 121);
+  color: white;
+  padding: 10px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rbc-time-column {
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+}
+
+.rbc-allday-cell,
+.rbc-header-cell {
+  display: none !important;
+}
+
+.rbc-timeslot-group {
+  min-height: 15px;
+}
+
+.rbc-event-label {
+  display: none;
+}
+
+.patient-name {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin: 0;
+}
+
+.rbc-addons-dnd-resizable {
+  width: 100%;
+}
+.event-header-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.procedure-comment-wrapper {
+  margin-top: 8px;
+}
+
+.procedure-title,
+.procedure-comment {
+  margin: 0;
+}
+
+.rbc-btn-group button {
+  background-color: white;
+}
+
+.rbc-toolbar-label {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.rbc-btn-group button {
+  cursor: pointer;
+}
+
+.rbc-time-view-resources {
+  z-index: 0;
+}
+
+
