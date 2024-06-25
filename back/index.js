@@ -67,8 +67,6 @@ app.post("/dentistry_clinic_admin/doctors/", async (req, res) => {
     const collection = db.collection("doctors");
     const newDoctor = req.body;
 
-    // validation
-
     const result = await collection.insertOne(newDoctor);
     res.json({
       message: "Doctor added successfully",
@@ -277,15 +275,14 @@ app.patch(
         { $push: { medicalHistory: newCondition } }
       );
 
-      res
-        .status(200)
-        .json({ message: "Medical condition added successfully", conditionId });
+      res.status(200).json({ message: "Medical condition added successfully", conditionId });
     } catch (e) {
       console.error("Error adding medical condition:", e);
       res.status(500).json({ error: "Internal server error" });
     }
   }
 );
+
 
 //edit condition
 
