@@ -38,7 +38,6 @@ export function Home() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
 
   useEffect(() => {
     if (!schedules) return;
