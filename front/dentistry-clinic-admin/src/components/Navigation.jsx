@@ -2,13 +2,17 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "../styles/navigation.css";
 import Logo from "../assets/White logo.png";
+import { FaBars, FaTimes } from 'react-icons/fa';
 
 export function Navigation() {
   const location = useLocation();
   const [activeLink, setActiveLink] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     setActiveLink(location.pathname);
+    // Close menu when the location changes
+    setMenuOpen(false);
   }, [location]);
 
   return (
@@ -18,7 +22,7 @@ export function Navigation() {
           <img src={Logo} alt="Dentistry Clinic Admin system Logo"></img>
         </Link>
       </div>
-      <div className="link-container">
+      <div className={`link-container ${menuOpen ? "open" : ""}`}>
         <ul>
           <li>
             <Link
@@ -61,6 +65,9 @@ export function Navigation() {
             </Link>
           </li>
         </ul>
+      </div>
+      <div className="burger-icon" onClick={() => setMenuOpen(!menuOpen)}>
+        {menuOpen ? <FaTimes /> : <FaBars />}
       </div>
     </div>
   );
