@@ -3,7 +3,7 @@ import { Button } from "./Button";
 import { AlertModal } from "./AlertModal";
 import { AddFormModal } from "./AddFormModal";
 import { useGetData } from "../customHooks/useGetData";
-// import "../styles/schedule-modal.css";
+import "../styles/schedule-modal.css";
 
 export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   const toDateTimeLocalString = (date) => {
@@ -24,21 +24,20 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   const { data: patients, loading, rerender } = useGetData("patients");
 
   useEffect(() => {
-      if (event) {
-        
-        const [firstName, lastName] = event.title.split(' ');
-          
+    if (event) {
+      const [firstName, lastName] = event.title.split(" ");
+
       setFormData({
         eventID: event.id,
+        patientName: firstName || "",
+        patientLastname: lastName || "",
+        patientPhone: event.patientPhone || "",
         doctorID: event.resourceId,
-        patientName: firstName || '', 
-        patientLastname: lastName || '', 
         procedure: event.data.procedure,
         comment: event.data.comment || "",
         start: event.start ? toDateTimeLocalString(new Date(event.start)) : "",
         end: event.end ? toDateTimeLocalString(new Date(event.end)) : "",
-          patientID: event.patientID,
-        patientPhone: event.patientPhone || ""
+        patientID: event.patientID,
       });
     }
   }, [event]);
@@ -146,7 +145,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
 
   const renderDoctorSelect = () => {
     return (
-      <div className="edit-form-input">
+      <div className="input-wrapper">
         <label htmlFor="doctorID">Doctor:</label>
         <select
           id="doctorID"
@@ -165,60 +164,104 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
   };
 
   const renderFormFields = () => {
-    return Object.keys(formData).map((key) => {
-      if (key === "eventID" || key === "patientID") {
-        return null;
-      }
+    const leftColumnFields = [
+      "patientName",
+      "patientLastname",
+      "patientPhone",
+      "doctorID",
+    ];
+    const rightColumnFields = ["procedure", "comment", "start", "end"];
 
-      const value = formData[key];
-      if (key === "doctorID") {
-        return renderDoctorSelect();
-      }
+    return (
+      <div className="form-columns">
+        <div className="form-column">
+          {leftColumnFields.map((key) => {
+            if (key === "doctorID") {
+              return renderDoctorSelect();
+            }
 
-      return (
-        <div className="edit-form-input" key={key}>
-          <label htmlFor={key}>
-            {key.charAt(0).toUpperCase() +
-              key.slice(1).replace(/([A-Z])/g, " $1")}
-            :
-          </label>
-          <input
-            type={key === "start" || key === "end" ? "datetime-local" : "text"}
-            id={key}
-            name={key}
-            value={value}
-            onChange={handleChange}
-            required={key === "start" || key === "end"}
-          />
-          {errors[key] && <p className="error-message">{errors[key]}</p>}
+            const value = formData[key];
+            return (
+              <div className="input-wrapper" key={key}>
+                <label htmlFor={key}>
+                  {key.charAt(0).toUpperCase() +
+                    key.slice(1).replace(/([A-Z])/g, " $1")}
+                  :
+                </label>
+                <input
+                  type={
+                    key === "start" || key === "end" ? "datetime-local" : "text"
+                  }
+                  id={key}
+                  name={key}
+                  value={value}
+                  onChange={handleChange}
+                  required={key === "start" || key === "end"}
+                />
+                {errors[key] && <p className="error-message">{errors[key]}</p>}
+              </div>
+            );
+          })}
         </div>
-      );
-    });
+        <div className="form-column">
+          {rightColumnFields.map((key) => {
+            const value = formData[key];
+            return (
+              <div className="input-wrapper" key={key}>
+                <label htmlFor={key}>
+                  {key.charAt(0).toUpperCase() +
+                    key.slice(1).replace(/([A-Z])/g, " $1")}
+                  :
+                </label>
+                <input
+                  type={
+                    key === "start" || key === "end" ? "datetime-local" : "text"
+                  }
+                  id={key}
+                  name={key}
+                  value={value}
+                  onChange={handleChange}
+                  required={key === "start" || key === "end"}
+                />
+                {errors[key] && <p className="error-message">{errors[key]}</p>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div id="add-modal">
-      <div className="form-container">
+    <div id="schedule-modal">
+      <div className="schedule-modal-content">
         <span className="close" onClick={onClose}>
           &times;
         </span>
-        <h2>Appointment Info</h2>
-        <Button
-          buttonText="APPOINTMENT REPORT"
-          onClick={handleAppointmentReportClick}
-        />
-        <Button buttonText={"ADD PATIENT"} onClick={handleAddPatientClick} />
-        <form className="edit-form">
-          {renderFormFields()}
-          <div className="modal-buttons">
-            <Button buttonText="SAVE" onClick={handleSave} />
-            <Button buttonText="CANCEL" onClick={onClose} />
+        <div className="schedule-modal-header-wrapper">
+          {" "}
+          <h2 className="modal-h2">Appointment Info</h2>
+          <div className="schedule-buttons-wrapper">
+            {" "}
             <Button
-              buttonText="DELETE APPOINTMENT"
-              onClick={handleDeleteClick}
+              buttonText="APPOINTMENT REPORT"
+              onClick={handleAppointmentReportClick}
+            />
+            <Button
+              buttonText={"ADD PATIENT"}
+              onClick={handleAddPatientClick}
             />
           </div>
+        </div>
+
+        <form>
+          {renderFormFields()}
+          <div className="schedule-buttons-wrapper">
+            <Button buttonText="SAVE" onClick={handleSave} />
+            <Button buttonText="CANCEL" onClick={onClose} />
+          </div>
         </form>
+        <Button buttonText="DELETE APPOINTMENT" onClick={handleDeleteClick} />
       </div>
       {isAlertModalOpen && scheduleToDelete && (
         <AlertModal
@@ -276,12 +319,7 @@ export function ScheduleModal({ event, onSave, onClose, onDelete, doctors }) {
           resource="patients"
           onClose={handleAddFormCloseModal}
           existingCategories={[]}
-                  rerender={rerender}
-                  initialFormData={{
-                      name: formData.patientName,
-                      lastname:formData.patientLastname,
-                      phone: formData.patientPhone
-                  }}
+          rerender={rerender}
         />
       )}
     </div>
