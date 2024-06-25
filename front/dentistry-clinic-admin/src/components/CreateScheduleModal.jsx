@@ -4,7 +4,7 @@ import { Button } from "./Button";
 import { useSearch } from "../customHooks/useSearch";
 import { SearchInput } from "./SearchInput";
 import { useGetData } from "../customHooks/useGetData";
-import "../styles/add-form-modal.css";
+import "../styles/create-schedule-modal.css";
 
 const formatDateAndTime = (dateString) => {
   const date = new Date(dateString);
@@ -133,12 +133,17 @@ export function CreateScheduleModal({
       console.error("Error submitting schedule:", error);
     }
   };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
     if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: "",
+      }));
     }
   };
 
@@ -153,9 +158,15 @@ export function CreateScheduleModal({
 
   const handleProcedureChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, procedureName: value });
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
     if (errors[name]) {
-      setErrors({ ...errors, procedureName: "" });
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: "",
+      }));
     }
   };
 
@@ -190,7 +201,7 @@ export function CreateScheduleModal({
             )}
           </div>
 
-          <div>
+          <div className="input-wrapper">
             <input
               type="text"
               name="patientName"
@@ -202,7 +213,7 @@ export function CreateScheduleModal({
               <p className="error-message">{errors.patientName}</p>
             )}
           </div>
-          <div>
+          <div className="input-wrapper">
             <input
               type="text"
               name="patientLastname"
@@ -214,7 +225,7 @@ export function CreateScheduleModal({
               <p className="error-message">{errors.patientLastname}</p>
             )}
           </div>
-          <div>
+          <div className="input-wrapper">
             <input
               type="text"
               name="phone"
@@ -223,7 +234,7 @@ export function CreateScheduleModal({
               onChange={handleChange}
             />
           </div>
-          <div>
+          <div className="input-wrapper">
             <input
               type="datetime-local"
               name="start"
@@ -233,7 +244,7 @@ export function CreateScheduleModal({
             />
             {errors.start && <p className="error-message">{errors.start}</p>}
           </div>
-          <div>
+          <div className="input-wrapper">
             <input
               type="datetime-local"
               name="end"
@@ -243,7 +254,7 @@ export function CreateScheduleModal({
             />
             {errors.end && <p className="error-message">{errors.end}</p>}
           </div>
-          <div>
+          <div className="input-wrapper">
             <select
               name="category"
               value={formData.category}
@@ -257,7 +268,7 @@ export function CreateScheduleModal({
               ))}
             </select>
           </div>
-          <div>
+          <div className="input-wrapper">
             <select
               name="procedureName"
               value={formData.procedure}
@@ -272,7 +283,7 @@ export function CreateScheduleModal({
             </select>
           </div>
 
-          <div>
+          <div className="input-wrapper">
             <input
               type="text"
               name="comment"
