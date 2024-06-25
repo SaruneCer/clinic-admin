@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "./Button";
 import { usePostData } from "../customHooks/usePostData";
 import "../styles/add-form-modal.css";
@@ -8,9 +8,7 @@ export function AddFormModal({
   onClose,
   rerender,
   existingCategories = [],
-  procedures,
   appointmentInfo,
-  initialFormData
 }) {
   const fieldConfigurations = {
     doctors: [
@@ -34,7 +32,7 @@ export function AddFormModal({
       },
     ],
     procedures: [
-      { name: "name", type: "text", placeholder: "Title of procedure" },
+      { name: "name", type: "select", placeholder: "Title of procedure" },
       { name: "duration", type: "number", placeholder: "Duration in minutes" },
       { name: "price", type: "number", placeholder: "Price" },
       { name: "category", type: "select", placeholder: "Category" },
@@ -49,28 +47,11 @@ export function AddFormModal({
     ],
   };
 
+  const initialFormData = {};
 
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [filteredProcedures, setFilteredProcedures] = useState([]);
-  const { postData, isLoading } = usePostData(resource);
-
-  useEffect(() => {
-    setFormData(initialFormData); 
-  }, [initialFormData]);
-
-  useEffect(() => {
-    if (selectedCategory) {
-      setFilteredProcedures(
-        procedures.filter(
-          (procedure) => procedure.category === selectedCategory
-        )
-      );
-    } else {
-      setFilteredProcedures(procedures);
-    }
-  }, [selectedCategory, procedures]);
+  const { postData } = usePostData(resource);
 
   const fields = fieldConfigurations[resource] || [];
 
@@ -106,23 +87,16 @@ export function AddFormModal({
         newErrors[phoneField.name] = "Number invalid";
       }
     }
+    if (resource === "schedules") {
+      const { start, end } = formData;
+      if (new Date(start) >= new Date(end)) {
+        newErrors.start = "Start time must be before end time";
+        newErrors.end = "End time must be after start time";
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleCategoryChange = (e) => {
-    const { value } = e.target;
-    setSelectedCategory(value);
-    setFormData((prevData) => ({ ...prevData, procedureName: "" }));
-  };
-
-  const handleProcedureChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -162,10 +136,9 @@ export function AddFormModal({
       if (resource === "appointments") {
         const dateObject = new Date(appointmentInfo.date);
         const formattedDate = dateObject.toISOString().split("T")[0];
-
-        structuredData.doctorID = appointmentInfo.doctorID;
-        structuredData.patientID = appointmentInfo.patientID;
         structuredData.appointmentDate = formattedDate;
+        structuredData.patientID = appointmentInfo.patientID;
+        structuredData.doctorID = appointmentInfo.doctorID;
       }
 
       await postData(structuredData);
@@ -174,7 +147,7 @@ export function AddFormModal({
       }
       onClose();
     } catch (error) {
-      console.error("Error submitting data:", error);
+      console.error("Error submitting form:", error);
     }
   };
 
@@ -187,82 +160,60 @@ export function AddFormModal({
   };
 
   return (
-    <div id="add-modal">
-      <div className="form-container">
+    <div className="modal">
+      <div className="modal-content">
         <span className="close" onClick={onClose}>
           &times;
         </span>
         <form>
           {fields.map((field) => (
             <div className="input-wrapper" key={field.name}>
-              {resource === "procedures" && field.type === "select" && (
-                <select
-                  name={field.name}
-                  value={formData[field.name] || ""}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Category</option>
-                  {existingCategories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                  <option value="addNewCategory">Add New Category</option>
-                </select>
-              )}
-
-              {resource === "appointments" && field.name === "report" && (
+              {field.type === "select" && resource === "procedures" && field.name === "category" ? (
+                <>
+                  <select
+                    name={field.name}
+                    value={formData[field.name] || ""}
+                    onChange={(e) => {
+                      handleChange(e);
+                      if (e.target.value === "addNewCategory") {
+                        setFormData((prevData) => ({
+                          ...prevData,
+                          newCategory: "",
+                        }));
+                      }
+                    }}
+                  >
+                    <option value="">Select Category</option>
+                    {existingCategories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                    <option value="addNewCategory">Add New Category</option>
+                  </select>
+                  {formData.category === "addNewCategory" && (
+                    <input
+                      type="text"
+                      placeholder="New category name"
+                      value={formData.newCategory || ""}
+                      onChange={(e) =>
+                        setFormData((prevData) => ({
+                          ...prevData,
+                          newCategory: e.target.value,
+                        }))
+                      }
+                    />
+                  )}
+                </>
+              ) : field.type === "textarea" ? (
                 <textarea
                   name={field.name}
                   placeholder={field.placeholder}
                   value={formData[field.name] || ""}
-                  onChange={handleChange}
+                    onChange={handleChange}
+                    className={resource === "appointments" ? "appointment-report-textarea" : ""}
                 />
-              )}
-
-              {resource === "schedules" && field.type === "select" && (
-                <>
-                  {field.name === "category" && (
-                    <select
-                      name="category"
-                      value={formData.category || ""}
-                      onChange={handleCategoryChange}
-                    >
-                      <option value="">Select Category</option>
-                      {existingCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  {resource === "appointments" && field.type === "textarea" && (
-                    <textarea
-                      name="report"
-                      placeholder="Appointment details, prescribed medications and next scheduled appointments."
-                      value={formData.report || ""}
-                      onChange={handleChange}
-                    />
-                  )}
-
-                  {field.name === "procedureName" && (
-                    <select
-                      name="procedureName"
-                      value={formData.procedureName || ""}
-                      onChange={handleProcedureChange}
-                    >
-                      <option value="">Select Procedure</option>
-                      {filteredProcedures.map((procedure) => (
-                        <option key={procedure.id} value={procedure.name}>
-                          {procedure.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </>
-              )}
-              {!(resource === "appointments" && field.name === "report") && (
+              ) : (
                 <input
                   type={field.type}
                   name={field.name}
@@ -271,18 +222,12 @@ export function AddFormModal({
                   onChange={handleChange}
                 />
               )}
-
               {errors[field.name] && (
                 <p className="error-message">{errors[field.name]}</p>
               )}
             </div>
           ))}
-
-          <Button
-            buttonText="Add"
-            disabled={isLoading}
-            onClick={handleSubmit}
-          />
+          <Button buttonText={"ADD"} onClick={handleSubmit} />
         </form>
       </div>
     </div>
