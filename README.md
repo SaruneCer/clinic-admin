@@ -40,25 +40,25 @@ Software dependencies:
 Open terminal in Visual Studio Code.
 Terminal commands to run:
 
-git clone https://github.com/SaruneCer/final_project.git -->
-cd final-project
+    1) git clone https://github.com/SaruneCer/final_project.git
+    2) cd final-project 
 
 2. Back End installation process:
 
 Open integrated terminal in back folder.
 Terminal commands to run:
 
-npm install -->
-npm install cors express normalize.css mongodb nodemon -->
-npm start
+    1) npm install
+    2) npm install cors express normalize.css mongodb nodemon
+    3) npm start
 
 3. Front End installation process: 
 
-Open integrated terminal in front folder.
+Open integrated terminal in front dentistry-clinic-admin folder.
 Terminal commands to run:
 
-npm install -->
-npm install moment normalize.css react react-big-calendar react-datepicker react-dnd react-dnd-html5-backend react-dom react-icons react-router-dom react-tooltip -->
-npm run dev
+    1) npm install
+    2) npm install moment normalize.css react react-big-calendar react-datepicker react-dnd react-dnd-html5-backend react-dom react-icons react-router-dom react-tooltip
+    3) npm run dev
 
-
+Copy local-host link from terminal and paste in your browser to open Clinic Admin application. 
