@@ -2,22 +2,14 @@
 
 This is Clinic Admin application for dental clinic administration. Project created for final exam of studies in Code Academy, Vilnius. 
 
+In this application users are able to store doctors, patients, procedures information. In Home page calendar is implemented for creating scheduled appointments. CRUD operations are available for all - doctors, patients, procedures and schedules. 
+
 # What's in this project?
 
 Two folders:
 1. back - containing server side.
-2. front - containing UI side. 
 
-
-# Getting Started - Back-end
-
-1. Installation process:
-
-Terminal commands to run:
-npm instal ->
-npm start -> 
-
-2. Software dependencies:
+Software dependencies:
 
     "cors": "^2.8.5",
     "express": "^4.19.2",
@@ -25,16 +17,10 @@ npm start ->
     "nodemon": "^3.1.3",
     "normalize.css": "^8.0.1"
 
-# Getting Started - Front-end
+2. front - containing UI side. 
 
-1. Installation process:
+Software dependencies:
 
-Terminal commands to run:
-
-npm instal ->
-npm run dev -> 
-
-2. Software dependencies:
     "moment": "^2.30.1",
     "normalize.css": "^8.0.1",
     "react": "^18.2.0",
@@ -46,4 +32,33 @@ npm run dev ->
     "react-icons": "^5.2.1",
     "react-router-dom": "^6.23.1",
     "react-tooltip": "^5.27.0"
+
+# Getting Started 
+
+1. Clone repository:
+
+Open terminal in Visual Studio Code.
+Terminal commands to run:
+
+git clone https://github.com/SaruneCer/final_project.git -->
+cd final-project
+
+2. Back End installation process:
+
+Open integrated terminal in back folder.
+Terminal commands to run:
+
+npm install -->
+npm install cors express normalize.css mongodb nodemon -->
+npm start
+
+3. Front End installation process: 
+
+Open integrated terminal in front folder.
+Terminal commands to run:
+
+npm install -->
+npm install moment normalize.css react react-big-calendar react-datepicker react-dnd react-dnd-html5-backend react-dom react-icons react-router-dom react-tooltip -->
+npm run dev
+
 
